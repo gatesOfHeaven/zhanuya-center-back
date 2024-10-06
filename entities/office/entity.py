@@ -12,7 +12,6 @@ class Office(BaseEntity):
     __tablename__ = 'offices'
 
     id = Column(Integer, primary_key = True)
-    city = Column(String, nullable=False)
     address = Column(String, unique = True, nullable = False)
     room = Column(String, nullable=False)
 

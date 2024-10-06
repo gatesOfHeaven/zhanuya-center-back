@@ -11,7 +11,7 @@ from .types import SignInReq
 router = APIRouter()
 
 
-@router.post('/', response_model = UserAsPrimary)
+@router.post('', response_model = UserAsPrimary)
 async def sign_in(
     request_data: SignInReq = Body(),
     db: AsyncSession = Depends(connect_db)
@@ -22,5 +22,5 @@ async def sign_in(
     )
     return JSONResponse(
         headers = auth.get_auth_headers(user.id),
-        content = UserAsPrimary.resource(user)
+        content = UserAsPrimary.to_json(user)
     )

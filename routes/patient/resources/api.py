@@ -12,7 +12,7 @@ from .types import ResourcesRes
 router = APIRouter()
 
 
-@router.get('/', response_model = ResourcesRes)
+@router.get('', response_model = ResourcesRes)
 async def get_resources(
     doctors: bool = Query(False),
     categories: bool = Query(False),

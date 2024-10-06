@@ -15,7 +15,7 @@ class UserAsPrimary(BaseModel):
     email: str
     role: str
 
-    def resource(user: User):
+    def to_json(user: User):
         birth_date: date = user.birth_date
         return UserAsPrimary(
             id = user.id,

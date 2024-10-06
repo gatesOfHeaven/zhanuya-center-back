@@ -13,7 +13,7 @@ from .types import SendVerificationReq, SignUpReq, SignUpRes
 router = APIRouter()
 
 
-@router.post('/', response_model = None)
+@router.post('', response_model = None)
 async def send_verification_code(
     request_data: SendVerificationReq = Body(),
     db: AsyncSession = Depends(connect_db)
@@ -60,5 +60,5 @@ async def sign_up(
 async def me(me: User = Depends(auth.authenticate_me)):
     return JSONResponse(
         headers = auth.get_auth_headers(me.id),
-        content = UserAsPrimary.resource(me)
+        content = UserAsPrimary.to_json(me)
     )
