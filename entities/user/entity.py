@@ -6,6 +6,7 @@ from utils.db import BaseEntity
 
 if TYPE_CHECKING:
     from entities.role import Role
+    from entities.slot import Slot
 
 
 class User(BaseEntity):
@@ -21,3 +22,4 @@ class User(BaseEntity):
     password_hash = Column(String, nullable = False)
 
     role: Mapped['Role'] = relationship(back_populates = 'users')
+    slots: Mapped[list['Slot'] | None] = relationship(back_populates = 'patient')

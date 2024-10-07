@@ -11,6 +11,21 @@ from .entity import Doctor
 
 
 class Query(BaseQuery):
+    async def get(self, id: int) -> Doctor:
+        query = select(Doctor).options(
+            joinedload(Doctor.profile),
+            joinedload(Doctor.category),
+            joinedload(Doctor.office)
+        ).where(Doctor.id == id)
+        doctor = (await self.db.execute(query)).scalar_one_or_none()
+        if doctor is None:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                'Such Doctor Not Found'
+            )
+        return doctor
+
+
     async def all(self) -> list[Doctor]:
         query = select(Doctor).options(joinedload(Doctor.profile))
         return (await self.db.execute(query)).scalars().all()

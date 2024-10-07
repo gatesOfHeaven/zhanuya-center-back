@@ -26,3 +26,10 @@ async def authenticate_me(
             'Invalid Token'
         )
     return me
+
+
+async def authenticate_me_if_token(
+    token: str | None = Header(None, alias='Auth'),
+    db: AsyncSession = Depends(connect_db)
+) -> User | None:
+    return await authenticate_me(token, db) if token else None
