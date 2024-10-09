@@ -4,6 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from utils.db import lifespan
 from routes.auth import auth_router
 from routes.patient import patient_router
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 app = FastAPI(
@@ -26,4 +30,4 @@ app.add_middleware(
 
 if __name__ == '__main__':
     from uvicorn import run
-    run('main:app', host = '0.0.0.0', port = 2222, reload = True)
+    run('main:app', host = '0.0.0.0', port = 2222)

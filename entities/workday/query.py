@@ -15,7 +15,7 @@ class Query(BaseQuery):
                 Workday.doctor_id == doctor.id,
                 Workday.date == day
             ).options(joinedload(Workday.slots))
-            workday = (await self.db.execute(query)).scalar_one_or_none()
+            workday = (await self.db.execute(query)).unique().scalar_one_or_none()
 
             if workday is not None:
                 schedule.append(workday)

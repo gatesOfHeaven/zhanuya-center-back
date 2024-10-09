@@ -8,13 +8,14 @@ class SendVerificationReq(BaseModel):
 
 
 class SignUpReq(BaseModel):
-    name: str = Field(max_length=25)
-    surname: str = Field(max_length=25)
-    email: str = Field(pattern=r'[^@]+@[^@]+\.[^@]+')
-    gender: str = Field(min_length=4, max_length = 6)
-    birthDate: str = Field(min_length=10, max_length=10)
+    name: str = Field(max_length = 25)
+    surname: str = Field(max_length = 25)
+    email: str = Field(pattern = r'[^@]+@[^@]+\.[^@]+')
+    iin: str = Field(min_length = 12, max_length = 12)
+    gender: str = Field(min_length = 4, max_length = 6)
+    birthDate: str = Field(min_length = 10, max_length = 10)
     emailVerificationCode: int
-    password: str =Field(min_length=8, max_length=25, pattern=r'^[A-Za-z\d@$!%*?&]+$')
+    password: str =Field(min_length = 8, max_length = 25, pattern = r'^[A-Za-z\d@$!%*?&]+$')
 
 
 class SignUpRes(BaseModel):

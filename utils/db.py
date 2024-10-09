@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import MetaData
+from typing import AsyncGenerator
 from dotenv import load_dotenv
 from os import getenv
 
@@ -25,10 +27,11 @@ asyncSession = sessionmaker(
 
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
-        await conn.run_sync(BaseEntity.metadata.create_all)
+        metadata: MetaData = BaseEntity.metadata
+        await conn.run_sync(metadata.create_all)
     yield
 
-    
-async def connect_db():
+
+async def connect_db() -> AsyncGenerator[AsyncSession, None]:
     async with asyncSession() as session:
         yield session

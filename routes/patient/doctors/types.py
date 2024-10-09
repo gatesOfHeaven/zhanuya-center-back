@@ -4,7 +4,7 @@ from utils.facades import calc
 from entities.user import User
 from entities.doctor import Doctor
 from entities.category import CategoryAsForeign
-from entities.office import OfficeAsForeign
+from entities.room import RoomAsPrimary
 from entities.worktime import Worktime, WorktimeAsForeign
 from entities.workday import Workday, WorkdayAsPrimary
 
@@ -17,7 +17,7 @@ class DoctorAsElement(BaseModel):
     age: int
     expInMonthes: int
     category: CategoryAsForeign
-    office: OfficeAsForeign
+    office: RoomAsPrimary
 
     def to_json(doctor: Doctor):
         return DoctorAsElement(
@@ -28,7 +28,7 @@ class DoctorAsElement(BaseModel):
             age = calc.get_age(doctor.profile.birth_date),
             expInMonthes = calc.get_monthes(doctor.career_started_on),
             category = CategoryAsForeign.to_json(doctor.category),
-            office = OfficeAsForeign.to_json(doctor.office)
+            office = RoomAsPrimary.to_json(doctor.office)
         ).model_dump()
     
 

@@ -4,7 +4,7 @@ from entities.user import User
 from entities.doctor import Doctor
 from entities.category import Category, CategoryAsForeign
 from entities.doctor import Doctor
-from entities.office import Office
+from entities.building import Building, BuildingAsForeign
 
 
 class DoctorsAsResource(BaseModel):
@@ -23,15 +23,15 @@ class DoctorsAsResource(BaseModel):
 class ResourcesRes(BaseModel):
     doctors: list[DoctorsAsResource]
     categories: list[CategoryAsForeign]
-    offices: list[str]
+    offices: list[BuildingAsForeign]
 
     def to_json(
         doctors: list[Doctor],
         categories: list[Category],
-        offices: list[Office]
+        offices: list[Building]
     ):
         return ResourcesRes(
             doctors = [DoctorsAsResource.to_json(doctor.profile) for doctor in doctors],
             categories = [CategoryAsForeign.to_json(category) for category in categories],
-            offices = [office.address for office in offices]
+            offices = [BuildingAsForeign.to_json(office) for office in offices]
         ).model_dump()

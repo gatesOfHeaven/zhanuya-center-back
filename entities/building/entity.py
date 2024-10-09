@@ -6,13 +6,13 @@ from utils.db import BaseEntity
 
 if TYPE_CHECKING:
     from entities.doctor import Doctor
+    from entities.room import Room
 
 
-class Office(BaseEntity):
-    __tablename__ = 'offices'
+class Building(BaseEntity):
+    __tablename__ = 'buildings'
 
     id = Column(Integer, primary_key = True)
-    address = Column(String, unique = True, nullable = False)
-    room = Column(String, nullable=False)
+    address = Column(String, nullable = False)
 
-    doctors: Mapped[list['Doctor']] = relationship(back_populates = 'office')
+    rooms: Mapped[list['Room']] = relationship(back_populates = 'building')

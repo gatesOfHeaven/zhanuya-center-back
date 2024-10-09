@@ -17,11 +17,11 @@ router = APIRouter()
 @router.get('', response_model = DoctorAsElement)
 async def search_doctors(
     fullname: str | None = Query(None),
-    categories: list[str] | None = Query(None),
-    min_exp_years: int | None = Query(None, alias = 'min-exp-years'),
-    offices: list[str] | None = Query(None),
-    sort_by: str = Query('name', alias = 'sort-by'),
-    asc_order: bool = Query(True, alias = 'asc-order'),
+    categories: list[int] | None = Query(None),
+    min_exp_years: int | None = Query(None),
+    offices: list[int] | None = Query(None),
+    sort_by: str = Query('name'),
+    asc_order: bool = Query(True),
     db: AsyncSession = Depends(connect_db)
 ):
     doctors = await DoctorQuery(db).search_and_filter(
@@ -59,7 +59,7 @@ async def doctor_profile(
 @router.get('/{id}/{week_num}', response_model = Schedule)
 async def doctor_profile(
     id: int = Path(gt = 0),
-    week_num: int = Path(ge = 0, le = 3, alias = 'week-num'),
+    week_num: int = Path(ge = 0, le = 3),
     db: AsyncSession = Depends(connect_db),
     me: User | None = Depends(auth.authenticate_me_if_token)
 ):

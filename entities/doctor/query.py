@@ -1,12 +1,12 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select, or_
+from sqlalchemy import select, func, or_, and_
 from sqlalchemy.orm import joinedload
 
 from utils.bases import BaseQuery
-from utils.facades import calc
 from entities.user import User
 from entities.category import Category
-from entities.office import Office
+from entities.building import Building
+from entities.room import Room
 from .entity import Doctor
 
 
@@ -15,7 +15,7 @@ class Query(BaseQuery):
         query = select(Doctor).options(
             joinedload(Doctor.profile),
             joinedload(Doctor.category),
-            joinedload(Doctor.office)
+            joinedload(Doctor.office).joinedload(Room.building)
         ).where(Doctor.id == id)
         doctor = (await self.db.execute(query)).scalar_one_or_none()
         if doctor is None:
@@ -34,33 +34,41 @@ class Query(BaseQuery):
     async def search_and_filter(
         self,
         fullname: str | None = None,
-        categories: list[str] | None = None,
+        categories: list[int] | None = None,
         min_exp_years: int | None = None,
-        offices: list[str] | None = None,
+        offices: list[int] | None = None,
         sort_by: str = 'name',
         asc_order: bool = True
     ) -> list[Doctor]:
         query = select(Doctor).options(
             joinedload(Doctor.profile),
             joinedload(Doctor.category),
-            joinedload(Doctor.office)
-        ).join(User).join(Category).join(Office)
+            joinedload(Doctor.office).joinedload(Room.building)
+        ).join(User).join(Category).join(Room).join(Building)
 
-        if fullname is not None: query = (query.where(or_(
+        if fullname is not None:
+            fullname = fullname.strip()
+            names = fullname.split(' ')
+            if len(names) == 1: query = query.where(or_(
                 User.name.ilike(f'{fullname}%'),
                 User.surname.ilike(f'{fullname}%')
             ))
-        )
+            elif len(names) > 1: query = query.where(or_(
+                and_(User.name.ilike(f'{names[0]}%'), User.surname.ilike(f'{names[1]}%')),
+                and_(User.name.ilike(f'{names[1]}%'), User.surname.ilike(f'{names[0]}%'))
+            ))
+                
 
         if categories is not None:
-            query = query.where(Category.title.in_(categories))
+            query = query.where(Doctor.category_id.in_(categories))
 
         if offices is not None:
-            query = query.where(Office.address.in_(offices))
+            query = query.where(Room.building_id.in_(offices))
         
-        if min_exp_years is not None: query = query.where(
-            calc.get_monthes(Doctor.career_started_on) > 12 * min_exp_years
-        )
+        if min_exp_years is not None:
+            query_years = 12 * (func.extract('year', func.current_date()) - func.extract('year', Doctor.career_started_on))
+            query_monthes = func.extract('month', func.current_date()) - func.extract('month', Doctor.career_started_on)
+            query = query.where((query_years + query_monthes) > 12 * min_exp_years)
 
         if sort_by == 'name':
             query = query.order_by(User.name.asc() if asc_order else User.name.desc())
@@ -68,8 +76,9 @@ class Query(BaseQuery):
             query = query.order_by(User.surname.asc() if asc_order else User.surname.desc())
         elif sort_by == 'category':
             query = query.order_by(Category.title.asc() if asc_order else Category.title.desc())
-        elif sort_by == 'experience':
-            query = query.order_by(Doctor.career_started_on.desc() if asc_order else Doctor.career_started_on.asc())
+        elif sort_by == 'experience': query = query.order_by(
+            Doctor.career_started_on.desc() if asc_order else Doctor.career_started_on.asc()
+        )
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f'Invalid sort_by field: {sort_by}')
         return (await self.db.execute(query)).scalars().all()

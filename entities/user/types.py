@@ -13,6 +13,7 @@ class UserAsPrimary(BaseModel):
     birthDate: str
     age: int
     email: str
+    iin: str
     role: str
 
     def to_json(user: User):
@@ -22,8 +23,9 @@ class UserAsPrimary(BaseModel):
             name = user.name,
             surname = user.surname,
             gender = user.gender,
-            birthDate = birth_date.strftime('%d-%m-%Y'),
+            birthDate = calc.time_to_str(birth_date),
             age = calc.get_age(user.birth_date),
             email = user.email,
+            iin = user.iin,
             role = user.role.name
         ).model_dump()

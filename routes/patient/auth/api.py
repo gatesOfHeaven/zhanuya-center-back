@@ -46,6 +46,7 @@ async def sign_up(
         name = request_data.name,
         surname = request_data.surname,
         email = request_data.email,
+        iin = request_data.iin,
         gender = request_data.gender,
         birth_date = request_data.birthDate,
         password_hash = hash.it(request_data.password)

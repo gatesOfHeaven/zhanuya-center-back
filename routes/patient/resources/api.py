@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from utils.db import connect_db
 from entities.doctor import DoctorQuery
 from entities.category import CategoryQuery
-from entities.office import OfficeQuery
+from entities.building import BuildingQuery
 from .types import ResourcesRes
 
 
@@ -22,5 +22,5 @@ async def get_resources(
     return JSONResponse(ResourcesRes.to_json(
         doctors = await DoctorQuery(db).all() if doctors else [],
         categories = await CategoryQuery(db).all() if categories else [],
-        offices = await OfficeQuery(db).all() if offices else []
+        offices = await BuildingQuery(db).all() if offices else []
     ))

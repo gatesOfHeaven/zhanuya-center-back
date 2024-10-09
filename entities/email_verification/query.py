@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from utils.bases import BaseQuery
 from .entity import EmailVerification
+from .values import code_expiring_mins
 
 
 class Query(BaseQuery):
@@ -37,7 +38,7 @@ class Query(BaseQuery):
                 )
             verification_record.code = verification_code
         else:
-            expires_at = datetime.now() + timedelta(minutes = 15)
+            expires_at = datetime.now() + timedelta(minutes = code_expiring_mins)
             verification_record = EmailVerification(
                 email = email,
                 code = verification_code,
