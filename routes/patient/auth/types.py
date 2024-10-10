@@ -5,13 +5,19 @@ from entities.user import User
 
 class SendVerificationReq(BaseModel):
     email: str = Field(pattern=r'[^@]+@[^@]+\.[^@]+')
+    iin: str = Field(min_length = 12, max_length = 12, pattern = r'^\d+$')
+
+
+class VerificationConflictElement(BaseModel):
+    detail: str
+    location: str
 
 
 class SignUpReq(BaseModel):
     name: str = Field(max_length = 25)
     surname: str = Field(max_length = 25)
     email: str = Field(pattern = r'[^@]+@[^@]+\.[^@]+')
-    iin: str = Field(min_length = 12, max_length = 12)
+    iin: str = Field(min_length = 12, max_length = 12, pattern = r'^\d+$')
     gender: str = Field(min_length = 4, max_length = 6)
     birthDate: str = Field(min_length = 10, max_length = 10)
     emailVerificationCode: int

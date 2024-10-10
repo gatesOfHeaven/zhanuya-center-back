@@ -6,18 +6,15 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import MetaData
 from typing import AsyncGenerator
-from dotenv import load_dotenv
 from os import getenv
 
 from .bases import BaseEntity
 
 
-load_dotenv()
-
 engine = create_async_engine('sqlite+aiosqlite:///./test.db')
 
 
-asyncSession = sessionmaker(
+asyncSession: sessionmaker[AsyncSession] = sessionmaker(
     bind = engine,
     class_ = AsyncSession,
     expire_on_commit = False,

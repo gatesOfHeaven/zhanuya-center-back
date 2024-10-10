@@ -7,23 +7,47 @@ from utils.db import connect_db
 from utils.facades import auth, hash, mail
 from entities.user import User, UserQuery, UserAsPrimary
 from entities.email_verification import EmailVerificationQuery
-from .types import SendVerificationReq, SignUpReq, SignUpRes
+from .types import SendVerificationReq, VerificationConflictElement, SignUpReq, SignUpRes
 
 
 router = APIRouter()
 
 
-@router.post('', response_model = None)
+verification_responses = { status.HTTP_409_CONFLICT: {
+    'model': list[VerificationConflictElement]
+}}
+
+
+@router.post('', responses = verification_responses)
 async def send_verification_code(
     request_data: SendVerificationReq = Body(),
     db: AsyncSession = Depends(connect_db)
 ):
     verification_code = randint(1000, 9999)
-    await EmailVerificationQuery(db).new(
+    email_ok = await EmailVerificationQuery(db).new(
         request_data.email,
         verification_code,
         commit = False
     )
+    iin_ok = await UserQuery(db).iin_is_available(request_data.iin)
+
+    if not email_ok or not iin_ok:
+        fields: list[VerificationConflictElement] = []
+        if not email_ok:
+            fields.append(VerificationConflictElement(
+                detail = 'Email is Already Taken',
+                location = 'email'
+            ))
+        if not iin_ok:
+            fields.append(VerificationConflictElement(
+                detail = 'IIN Owner Does NOT Match',
+                location = 'iin'
+            ))
+        return JSONResponse(
+            status_code = status.HTTP_409_CONFLICT,
+            content = [field.model_dump() for field in fields]
+        )
+
     try:
         await db.commit()
         mail.send_verification_code(request_data.email, verification_code)
@@ -40,17 +64,22 @@ async def sign_up(
 ):
     await EmailVerificationQuery(db).verify(
         request_data.email,
-        request_data.emailVerificationCode
+        request_data.emailVerificationCode,
+        commit = False
     )
-    user = await UserQuery(db).new(
+    user_query = UserQuery(db)
+    user = await user_query.new(
         name = request_data.name,
         surname = request_data.surname,
         email = request_data.email,
         iin = request_data.iin,
         gender = request_data.gender,
         birth_date = request_data.birthDate,
-        password_hash = hash.it(request_data.password)
+        password = request_data.password, # test only
+        password_hash = hash.it(request_data.password),
+        commit = False
     )
+    await user_query.commit()
     return JSONResponse(
         status_code = status.HTTP_201_CREATED,
         content = SignUpRes.to_json(user)

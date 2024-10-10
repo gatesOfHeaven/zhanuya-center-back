@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from .auth.api import router as auth_router
-from .resources.api import router as resources_router
+from .resources import resources_router
 from .doctors.api import router as doctors_router
 
 

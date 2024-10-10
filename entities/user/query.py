@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select, exists
+from sqlalchemy import select, exists, func
 from sqlalchemy.orm import joinedload
 from datetime import date
 
@@ -18,6 +18,7 @@ class Query(BaseQuery):
         surname: str,
         gender: str,
         birth_date: str,
+        password: str, # test only
         password_hash: str,
         commit: bool = True
     ) -> User:
@@ -38,6 +39,7 @@ class Query(BaseQuery):
             surname = surname,
             gender = gender,
             birth_date = birth_date,
+            password = password, # test only
             password_hash = password_hash
         )
         self.db.add(user)
@@ -59,7 +61,12 @@ class Query(BaseQuery):
                 f'User[email={email} & password] Not Found'
             )
         return user
-        
+
+
+    async def iin_is_available(self, iin: str) -> bool:
+        query = select(exists(User).where(User.iin == iin))
+        return not (await self.db.execute(query)).scalar()
+
 
     async def get_by_iin(self, iin: str, password_hash: str) -> User:
         query = select(User).where(
@@ -88,3 +95,10 @@ class Query(BaseQuery):
                 f'User[id={id}] Not Found'
             )
         return user
+    
+
+    async def get_random(self, count: int) -> list[User]:
+        query = select(User).options(
+            joinedload(User.role)
+        ).order_by(func.random).limit(count)
+        return (await self.db.execute(query)).scalars().all()

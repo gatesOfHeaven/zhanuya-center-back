@@ -20,7 +20,7 @@ class User(BaseEntity):
     surname = Column(String(25), nullable = False)
     gender = Column(String(6), nullable=False)
     birth_date = Column(Date, nullable=False)
-    password = Column(String(25), nullable = False)
+    password = Column(String(25), nullable = False) # test only
     password_hash = Column(String, nullable = False)
 
     role: Mapped['Role'] = relationship(back_populates = 'users')

@@ -28,14 +28,11 @@ class Query(BaseQuery):
         email: str,
         verification_code: int,
         commit: bool = True
-    ) -> EmailVerification:
+    ) -> EmailVerification | None:
         verification_record = await self.get(email)
         if verification_record is not None:
             if verification_record.verified_at is not None:
-                raise HTTPException(
-                    status.HTTP_409_CONFLICT,
-                    'This Email Already Taken'
-                )
+                return None
             verification_record.code = verification_code
         else:
             expires_at = datetime.now() + timedelta(minutes = code_expiring_mins)

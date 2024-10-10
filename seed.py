@@ -16,26 +16,30 @@ from entities.workday.factory import Factory as WorkdayFactory
 from entities.slot.factory import Factory as SlotFactory
 
 
-async def seed():
+async def seed(db: AsyncSession):
+    worktimes = await WorktimeFactory(db).seed()
+    roles = await RoleFactory(db).seed()
+    users = await UserFactory(db).seed(100, roles)
+    await EmailVerificationFactory(db).seed(users)
+    categories = await CategoryFactory(db).seed()
+    buildings = await BuildingFactory(db).seed(3)
+    rooms = await RoomFactory(db).seed(25, buildings)
+    doctors = await DoctorFactory(db).seed(users, categories, rooms)
+    workdays = await WorkdayFactory(db).seed(date(2024, 9, 30), worktimes, doctors)
+    await SlotFactory(db).seed(workdays, users)
+
+
+async def main():
     async with engine.begin() as conn:
         metadata: MetaData = BaseEntity.metadata
         await conn.run_sync(metadata.create_all)
     
     async with asyncSession() as db:
         db: AsyncSession
-        worktimes = await WorktimeFactory(db).seed()
-        roles = await RoleFactory(db).seed()
-        users = await UserFactory(db).seed(100, roles)
-        await EmailVerificationFactory(db).seed(users)
-        categories = await CategoryFactory(db).seed()
-        buildings = await BuildingFactory(db).seed(3)
-        rooms = await RoomFactory(db).seed(25, buildings)
-        doctors = await DoctorFactory(db).seed(users, categories, rooms)
-        workdays = await WorkdayFactory(db).seed(date(2024, 9, 30), worktimes, doctors)
-        await SlotFactory(db).seed(workdays, users)
+        await seed(db)
         await db.commit()
 
 
 if __name__ == '__main__':
     from asyncio import run
-    run(seed())
+    run(main())

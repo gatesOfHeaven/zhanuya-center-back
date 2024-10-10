@@ -32,7 +32,7 @@ class Factory(BaseFactory):
                 surname = surname,
                 gender = choice(['male', 'female']),
                 birth_date = birth_date,
-                password = password,
+                password = password, # test only
                 password_hash = hash.it(password)
             )
             self.fakes.append(user)
