@@ -14,15 +14,13 @@ def date_assignable(worktime: Worktime, day: date) -> bool:
 
 
 class Factory(BaseFactory):
-    fakes: list[Workday]
-
     async def seed(
         self,
         start_date: date,
         worktimes: list[Worktime],
         doctors: list[Doctor]
     ):
-        self.fakes = []
+        fakes: list[Workday] = []
 
         last_day = date.today() + timedelta(weeks = 3)
         curr_day = start_date
@@ -36,24 +34,14 @@ class Factory(BaseFactory):
             for doctor in doctors:
                 starts_at = randint(worktime.starts_at, worktime.ends_at)
                 ends_at = randint(starts_at, worktime.ends_at)
-                if ends_at - starts_at > 4:
-                    lunch_starts_at = randint(starts_at, ends_at - 2)
-                    lunch_ends_at = lunch_starts_at + 1
-                else:
-                    lunch_starts_at = starts_at
-                    lunch_ends_at = starts_at
-
-                workday = Workday(
+                fakes.append(Workday(
                     doctor = doctor,
                     date = curr_day,
                     day_at_week = curr_day.weekday(),
                     starts_at = time(starts_at),
-                    ends_at = time(ends_at),
-                    lunch_starts_at = time(lunch_starts_at),
-                    lunch_ends_at = time(lunch_ends_at)
-                )
-                self.fakes.append(workday)
-                self.db.add(workday)
+                    ends_at = time(ends_at)
+                ))
             curr_day += timedelta(days = 1)
-        await self.flush()
-        return self.fakes
+            
+        await self.flush(fakes)
+        return fakes

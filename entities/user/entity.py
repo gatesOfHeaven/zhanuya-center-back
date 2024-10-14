@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship, Mapped
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from utils.db import BaseEntity
 
@@ -24,4 +24,4 @@ class User(BaseEntity):
     password_hash = Column(String, nullable = False)
 
     role: Mapped['Role'] = relationship(back_populates = 'users')
-    slots: Mapped[list['Slot'] | None] = relationship(back_populates = 'patient')
+    slots: Mapped[Optional[list['Slot']]] = relationship(back_populates = 'patient')

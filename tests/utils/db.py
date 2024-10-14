@@ -9,7 +9,7 @@ from utils.db import connect_db
 from utils.bases import BaseEntity
 
 
-engine = create_async_engine('sqlite+aiosqlite:///./temp.db', echo = True)
+engine = create_async_engine('sqlite+aiosqlite:///./temp.db')
 tempSessionLocal: sessionmaker[AsyncSession] = sessionmaker(
     bind = engine,
     class_ = AsyncSession,
@@ -19,14 +19,16 @@ tempSessionLocal: sessionmaker[AsyncSession] = sessionmaker(
 
 
 @fixture(scope = 'session', autouse = True)
-async def setup_database(temp_db: AsyncSession):
+async def setup_database():
     metadata: MetaData = BaseEntity.metadata
     async with engine.connect() as conn:
-        await conn.run_sync(metadata.create_all)
-        await seed(temp_db)
-        await temp_db.commit()
-        yield
         await conn.run_sync(metadata.drop_all)
+        await conn.run_sync(metadata.create_all)
+        async with tempSessionLocal() as session:
+            await seed(session)
+            await session.commit()
+            yield session
+        yield
 
 
 @fixture(scope = 'function')

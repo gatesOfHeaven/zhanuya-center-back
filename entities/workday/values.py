@@ -1,0 +1,1 @@
+CURR_WEEK_NUM = 0

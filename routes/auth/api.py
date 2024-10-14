@@ -30,6 +30,6 @@ async def sign_in(
     )
         
     return JSONResponse(
-        headers = auth.get_auth_headers(user.id),
+        headers = auth.get_auth_headers(user),
         content = UserAsPrimary.to_json(user)
     )

@@ -3,14 +3,10 @@ from .entity import Building
 
 
 class Factory(BaseFactory):
-    fakes: list[Building]
-
     async def seed(self, count: int):
-        self.fakes = []
-        
-        for _ in range(count):
-            building = Building(address = self.fake.address())
-            self.fakes.append(building)
-            self.db.add(building)
-        await self.flush()
-        return self.fakes
+        fakes: list[Building] = [
+            Building(address = self.fake.address())
+            for _ in range(count)
+        ]
+        await self.flush(fakes)
+        return fakes

@@ -26,13 +26,7 @@ worktimes = [
 
 
 class Factory(BaseFactory):
-    fakes: list[Worktime]
-
     async def seed(self):
-        self.fakes = []
-
-        for worktime in worktimes:
-            self.fakes.append(worktime)
-            self.db.add(worktime)
-        await self.flush()
-        return self.fakes
+        fakes: list[Worktime] = [worktime for worktime in worktimes]
+        await self.flush(fakes)
+        return fakes

@@ -14,14 +14,10 @@ category_titles = [
 
 
 class Factory(BaseFactory):
-    fakes: list[Category]
-
     async def seed(self):
-        self.fakes = []
-        
-        for title in category_titles:
-            category = Category(title = title)
-            self.fakes.append(category)
-            self.db.add(category)
-        await self.flush()
-        return self.fakes
+        fakes: list[Category] = [
+            Category(title = title)
+            for title in category_titles
+        ]
+        await self.flush(fakes)
+        return fakes

@@ -13,6 +13,7 @@ from entities.building.factory import Factory as BuildingFactory
 from entities.room.factory import Factory as RoomFactory
 from entities.doctor.factory import Factory as DoctorFactory
 from entities.workday.factory import Factory as WorkdayFactory
+from entities.lunch.factory import Factory as LunchFactory
 from entities.slot.factory import Factory as SlotFactory
 
 
@@ -26,6 +27,7 @@ async def seed(db: AsyncSession):
     rooms = await RoomFactory(db).seed(25, buildings)
     doctors = await DoctorFactory(db).seed(users, categories, rooms)
     workdays = await WorkdayFactory(db).seed(date(2024, 9, 30), worktimes, doctors)
+    await LunchFactory(db).seed(workdays)
     await SlotFactory(db).seed(workdays, users)
 
 

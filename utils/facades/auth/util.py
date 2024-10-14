@@ -11,8 +11,10 @@ from entities.user import User, UserQuery
 from .core import generate_token, authenticate_token
 
 
-def get_auth_headers(id: int) -> dict[str, str]:
-    return { 'Auth': f'Bearer { generate_token(id) }' }
+def get_auth_headers(me: User | None) -> dict[str, str] | None:
+    return {
+        'Auth': f'Bearer { generate_token(me.id) }'
+    } if me is not None else None
 
 
 async def authenticate_me(

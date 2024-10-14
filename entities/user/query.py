@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select, exists, func
+from sqlalchemy import select, exists, or_, func
 from sqlalchemy.orm import joinedload
 from datetime import date
 
@@ -22,12 +22,14 @@ class Query(BaseQuery):
         password_hash: str,
         commit: bool = True
     ) -> User:
-        query = select(exists(User).where(User.email == email))
-        email_used = (await self.db.execute(query)).scalar()
-        if email_used:
+        query = select(exists(User).where(
+            or_(User.email == email, User.iin == iin)
+        ))
+        credentials_used = (await self.db.execute(query)).scalar()
+        if credentials_used:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
-                'This Email Already Taken'
+                'This Credentials Already Taken'
             )
 
         birth_date: date = calc.str_to_time(birth_date, '%d-%m-%Y').date()
@@ -100,5 +102,5 @@ class Query(BaseQuery):
     async def get_random(self, count: int) -> list[User]:
         query = select(User).options(
             joinedload(User.role)
-        ).order_by(func.random).limit(count)
+        ).order_by(func.random()).limit(count)
         return (await self.db.execute(query)).scalars().all()

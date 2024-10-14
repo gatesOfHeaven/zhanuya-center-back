@@ -17,6 +17,6 @@ class BaseFactory:
         self.fake = baseFaker
         self.db = db
 
-    async def flush(self):
+    async def flush(self, fakes: list):
+        self.db.add_all(fakes)
         await self.db.flush()
-

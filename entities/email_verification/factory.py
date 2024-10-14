@@ -9,10 +9,8 @@ from .values import code_expiring_mins
 
 
 class Factory(BaseFactory):
-    fakes: list[EmailVerification]
-
     async def seed(self, users: list[User]):
-        self.fakes = []
+        fakes: list[EmailVerification] = []
 
         for user in users:
             if user.role_id == RoleID.PATIENT.value:
@@ -36,7 +34,6 @@ class Factory(BaseFactory):
                     code = randint(1000, 9999),
                     expires_at = self.fake.date_time()
                 )
-            self.fakes.append(email_verification)
-            self.db.add(email_verification)
-        await self.flush()
-        return self.fakes
+            fakes.append(email_verification)
+        await self.flush(fakes)
+        return fakes

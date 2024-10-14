@@ -15,16 +15,14 @@ def iin_from(date: str, num: int) -> str:
 
 
 class Factory(BaseFactory):
-    fakes: list[User]
-
     async def seed(self, count: int, roles: list[Role]):
-        self.fakes = []
+        fakes: list[User] = []
 
         for _ in range(count):
             birth_date = calc.str_to_time(self.fake.date(), self.date_format).date()
             password = self.fake.password()
             [name, surname, *_] = self.fake.name().split(' ')
-            user = User(
+            fakes.append(User(
                 email = self.fake.email(),
                 role = choice(roles),
                 iin = iin_from(birth_date, randint(1, 10**6 - 1)),
@@ -34,8 +32,7 @@ class Factory(BaseFactory):
                 birth_date = birth_date,
                 password = password, # test only
                 password_hash = hash.it(password)
-            )
-            self.fakes.append(user)
-            self.db.add(user)
-        await self.flush()
-        return self.fakes
+            ))
+            
+        await self.flush(fakes)
+        return fakes

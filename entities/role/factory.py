@@ -10,14 +10,10 @@ role_names = [
 
 
 class Factory(BaseFactory):
-    fakes: list[Role]
-
     async def seed(self):
-        self.fakes = []
-
-        for name in role_names:
-            role = Role(name = name)
-            self.fakes.append(role)
-            self.db.add(role)
-        await self.flush()
-        return self.fakes
+        fakes: list[Role] = [
+            Role(name = name)
+            for name in role_names
+        ]
+        await self.flush(fakes)
+        return fakes

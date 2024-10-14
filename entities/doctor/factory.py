@@ -24,29 +24,22 @@ avatar_urls = [
 
 
 class Factory(BaseFactory):
-    fakes: list[Doctor]
-
     async def seed(
         self,
         users: list[User],
         categories: list[Category],
         rooms: list[Room]
     ):
-        self.fakes = []
-
-        for user in users:
-            if user.role_id == RoleID.DOCTOR.value:
-                doctor = Doctor(
-                    id = user.id,
-                    category = choice(categories),
-                    office = choice(rooms),
-                    avatar_url = choice(avatar_urls),
-                    career_started_on = self.fake.date_between(
-                        start_date = user.birth_date,
-                        end_date = date.today()
-                    )
-                )
-                self.fakes.append(doctor)
-                self.db.add(doctor)
-        await self.flush()
-        return self.fakes
+        fakes: list[Doctor] = [Doctor(
+            id = user.id,
+            category = choice(categories),
+            office = choice(rooms),
+            avatar_url = choice(avatar_urls),
+            career_started_on = self.fake.date_between(
+                start_date = user.birth_date,
+                end_date = date.today()
+            )
+        ) for user in users if user.role_id == RoleID.DOCTOR.value]
+        
+        await self.flush(fakes)
+        return fakes

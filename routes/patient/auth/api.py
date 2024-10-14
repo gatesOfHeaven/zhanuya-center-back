@@ -86,9 +86,9 @@ async def sign_up(
     )
 
 
-@router.get('/me', response_model = UserAsPrimary)
+@router.get('', response_model = UserAsPrimary)
 async def me(me: User = Depends(auth.authenticate_me)):
     return JSONResponse(
-        headers = auth.get_auth_headers(me.id),
+        headers = auth.get_auth_headers(me),
         content = UserAsPrimary.to_json(me)
     )

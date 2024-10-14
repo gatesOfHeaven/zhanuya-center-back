@@ -1,23 +1,48 @@
-# from pytest import mark
-# from httpx import AsyncClient
-# from fastapi import status
-# from sqlalchemy.ext.asyncio import AsyncSession
+from pytest import mark
+from httpx import AsyncClient, ASGITransport
+from logging import Logger
 
-# from main import app
-# from config.app import HOST
-# from entities.user import UserQuery, UserAsPrimary
-# from entities.user.factory import Factory as UserFactory
-# from routes.auth import SignInReq
+from fastapi import status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from main import app
+from config.app import HOST
+from entities.user import UserQuery, UserAsPrimary
+from entities.user.factory import Factory as UserFactory
+from routes.auth import SignInReq
+from tests.utils.app import anyio_backend, logger
+from tests.utils.db import temp_db
 
 
-# @mark.asyncio
-# async def test_sign_in(temp_db: AsyncSession):
-#     me = (await UserQuery(temp_db).get_random(1))[0]
-#     async with AsyncClient(app = app, base_url = f'{HOST}/auth') as client:
-#         response = await client.post('', json = SignInReq(
-#             login = me.iin,
-#             password = me.password # test only
-#         ).model_dump())
+@mark.anyio
+async def test_sign_in_by_iin(temp_db: AsyncSession, logger: Logger, anyio_backend):
+    me = (await UserQuery(temp_db).get_random(1))[0]
+    async with AsyncClient(
+        transport = ASGITransport(app),
+        base_url = HOST
+    ) as client:
+        response = await client.post('/auth', json = SignInReq(
+            login = me.iin,
+            password = me.password # test only
+        ).model_dump())
+        logger.info(f'{response.request.method} {response.request.url}')
 
-#         assert response.status_code == status.HTTP_200_OK
-#         assert response.json() == UserAsPrimary.to_json(me)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == UserAsPrimary.to_json(me)
+
+
+@mark.anyio
+async def test_sign_in_by_email(temp_db: AsyncSession, logger: Logger, anyio_backend):
+    me = (await UserQuery(temp_db).get_random(1))[0]
+    async with AsyncClient(
+        transport = ASGITransport(app),
+        base_url = HOST
+    ) as client:
+        response = await client.post('/auth', json = SignInReq(
+            login = me.email,
+            password = me.password # test only
+        ).model_dump())
+        logger.info(f'{response.request.method} {response.request.url}')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == UserAsPrimary.to_json(me)

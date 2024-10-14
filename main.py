@@ -12,7 +12,8 @@ load_dotenv()
 
 app = FastAPI(
     title = 'Zhanuya Medical Center😷',
-    lifespan = lifespan
+    lifespan = lifespan,
+    redirect_slashes = False
 )
 
 app.include_router(auth_router, prefix = '/auth')
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     from uvicorn import run
     run(
         'main:app',
-        # host = '0.0.0.0',
+        host = '0.0.0.0',
         reload = True,
         port = 2222
     )
