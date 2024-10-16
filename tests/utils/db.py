@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from main import app
 from seed import seed
-from utils.db import connect_db
+from utils.db import connect_db, asyncSession
 from utils.bases import BaseEntity
 
 
@@ -33,10 +33,12 @@ async def setup_database():
 
 @fixture(scope = 'function')
 async def temp_db():
-    async with tempSessionLocal() as session:
+    async with asyncSession() as session:
         yield session
 
 
 @fixture(autouse = True)
 async def override_db_conn(temp_db: AsyncSession):
     app.dependency_overrides[connect_db] = lambda: temp_db
+    yield
+    app.dependency_overrides.clear()

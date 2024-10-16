@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 from utils.facades import calc
 from entities.user import User
-from entities.doctor import Doctor
+from entities.doctor import Doctor, DoctorAsPrimary
 from entities.category import CategoryAsForeign
 from entities.room import RoomAsPrimary
 from entities.worktime import Worktime, WorktimeAsForeign
@@ -33,7 +33,7 @@ class DoctorAsElement(BaseModel):
     
 
 class DoctorAsPage(BaseModel):
-    profile: DoctorAsElement
+    profile: DoctorAsPrimary
     worktime: WorktimeAsForeign
     schedule: list[WorkdayAsPrimary]
 
@@ -44,7 +44,7 @@ class DoctorAsPage(BaseModel):
         me: User | None
     ):
         return DoctorAsPage(
-            profile = DoctorAsElement.to_json(doctor),
+            profile = DoctorAsPrimary.to_json(doctor),
             worktime = WorktimeAsForeign.to_json(worktime),
             schedule = [
                 WorkdayAsPrimary.to_json(workday, me)
@@ -62,7 +62,7 @@ class Schedule(BaseModel):
         schedule: list[Workday],
         me: User | None
     ):
-        return DoctorAsPage(
+        return Schedule(
             worktime = WorktimeAsForeign.to_json(worktime),
             schedule = [
                 WorkdayAsPrimary.to_json(workday, me)

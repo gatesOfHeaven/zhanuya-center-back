@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, Date, Time, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, Mapped
 from typing import TYPE_CHECKING
 
-from utils.db import BaseEntity
+from utils.bases import BaseEntity
 
 if TYPE_CHECKING:
     from entities.workday import Workday
@@ -12,8 +12,8 @@ if TYPE_CHECKING:
 class Lunch(BaseEntity):
     __tablename__ = 'lunches'
 
-    doctor_id = Column(Integer, primary_key = True, index = False)
-    date = Column(Date, primary_key = True, index = False)
+    doctor_id = Column(Integer, primary_key = True)
+    date = Column(Date, primary_key = True)
     starts_at = Column(Time, nullable = False)
     ends_at = Column(Time, nullable = False)
 

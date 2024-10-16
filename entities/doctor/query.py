@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 from utils.bases import BaseQuery
 from entities.user import User
 from entities.category import Category
+from entities.price import Price
 from entities.building import Building
 from entities.room import Room
 from .entity import Doctor
@@ -15,9 +16,12 @@ class Query(BaseQuery):
         query = select(Doctor).options(
             joinedload(Doctor.profile),
             joinedload(Doctor.category),
-            joinedload(Doctor.office).joinedload(Room.building)
+            joinedload(Doctor.price_list).joinedload(Price.appointment_type),
+            joinedload(Doctor.office).joinedload(Room.building),
+            joinedload(Doctor.experience),
+            joinedload(Doctor.education)
         ).where(Doctor.id == id)
-        doctor = (await self.db.execute(query)).scalar_one_or_none()
+        doctor = (await self.db.execute(query)).unique().scalar_one_or_none()
         if doctor is None:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,

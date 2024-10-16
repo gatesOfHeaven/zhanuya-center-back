@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from utils.db import connect_db
 from utils.facades import auth
 from entities.user import User
-from entities.doctor import DoctorQuery
+from entities.doctor import DoctorQuery, DoctorAsPrimary
 from entities.worktime import WorktimeQuery
 from entities.workday import WorkdayQuery, CURR_WEEK_NUM
-from .types import DoctorAsElement, DoctorAsPage, Schedule, MakeAppointmentReq
+from .types import DoctorAsElement, Schedule, MakeAppointmentReq
 
 
 router = APIRouter()
@@ -38,20 +38,16 @@ async def search_doctors(
     ])
 
 
-@router.get('/{id}', response_model = DoctorAsPage)
+@router.get('/{id}', response_model = DoctorAsPrimary)
 async def doctor_profile(
     id: int = Path(gt = 0),
     me: User | None = Depends(auth.authenticate_me_if_token),
     db: AsyncSession = Depends(connect_db)
 ):
-    doctor = await DoctorQuery(db).get(id)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
-        content = DoctorAsPage.to_json(
-            doctor = doctor,
-            worktime = await WorktimeQuery(db).get_actual(),
-            schedule = await WorkdayQuery(db).get_schedule(doctor, CURR_WEEK_NUM),
-            me = me
+        content = DoctorAsPrimary.to_json(
+            await DoctorQuery(db).get(id)
         )
     )
 

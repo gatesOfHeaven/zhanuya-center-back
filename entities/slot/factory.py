@@ -5,6 +5,7 @@ from utils.bases import BaseFactory
 from utils.facades import calc
 from entities.user import User
 from entities.workday import Workday
+from entities.appointment_type import AppointmentType
 from entities.role import RoleID
 from .entity import Slot
 
@@ -16,7 +17,12 @@ def is_lunch_time(workday: Workday, some_time: time) -> bool:
 
 
 class Factory(BaseFactory):
-    async def seed(self, workdays: list[Workday], users: list[User]):
+    async def seed(
+        self,
+        workdays: list[Workday],
+        users: list[User],
+        types: list[AppointmentType]
+    ):
         fakes: list[Slot] = []
         patients = [user for user in users if user.role_id == RoleID.PATIENT.value]
 
@@ -29,6 +35,7 @@ class Factory(BaseFactory):
                         doctor_id = workday.doctor_id,
                         date = workday.date,
                         patient = choice(patients),
+                        type = choice(types),
                         starts_at = curr_time,
                         ends_at = next_time
                     ))
