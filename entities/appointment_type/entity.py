@@ -8,3 +8,5 @@ class AppointmentType(BaseEntity):
 
     id = Column(Integer, primary_key = True, index = True)
     name = Column(String(25), nullable = False)
+    min_duration_mins = Column(Integer, nullable = False)
+    max_duration_mins = Column(Integer, nullable = False)

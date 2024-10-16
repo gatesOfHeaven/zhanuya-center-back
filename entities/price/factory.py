@@ -14,7 +14,7 @@ class Factory(BaseFactory):
                 if self.fake.boolean(75):
                     fakes.append(Price(
                         doctor = doctor,
-                        type = type,
+                        appointment_type = type,
                         half_hour_price = randint(5, 25) * 1000
                     ))        
         await self.flush(fakes)
