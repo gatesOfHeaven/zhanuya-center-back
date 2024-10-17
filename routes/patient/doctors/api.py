@@ -8,6 +8,8 @@ from entities.user import User
 from entities.doctor import DoctorQuery, DoctorAsPrimary
 from entities.worktime import WorktimeQuery
 from entities.workday import WorkdayQuery, CURR_WEEK_NUM
+from entities.appointment_type import AppointmentTypeQuery
+from entities.slot import SlotQuery
 from .types import DoctorAsElement, Schedule, MakeAppointmentReq
 
 
@@ -75,17 +77,24 @@ async def make_appointment(
     id: int = Path(gt = 0),
     week_num: int = Path(ge = CURR_WEEK_NUM, le = 3),
     request_data: MakeAppointmentReq = Body(),
-    me: User | None = Depends(auth.authenticate_me_if_token),
+    me: User | None = Depends(auth.authenticate_me),
     db: AsyncSession = Depends(connect_db)
 ):
+    workday_query = WorkdayQuery(db)
     doctor = await DoctorQuery(db).get(id)
-    
+    await SlotQuery(db).new(
+        patient = me,
+        workday = await workday_query.get(doctor, request_data.date),
+        type = await AppointmentTypeQuery(db).get(request_data.type_id),
+        starts_at = request_data.starts_at,
+        ends_at = request_data.ends_at
+    )
     return JSONResponse(
         status_code = status.HTTP_201_CREATED,
         headers = auth.get_auth_headers(me),
         content = Schedule.to_json(
             worktime = await WorktimeQuery(db).get_actual(),
-            schedule = await WorkdayQuery(db).get_schedule(doctor, week_num),
+            schedule = await workday_query.get_schedule(doctor, week_num),
             me = me
         )
     )

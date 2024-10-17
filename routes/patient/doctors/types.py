@@ -73,4 +73,6 @@ class Schedule(BaseModel):
 
 class MakeAppointmentReq(BaseModel):
     date: str = Field(pattern = r'\d{2}\.\d{2}\.\d{4}')
-    time: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
+    type_id: int = Field(gt = 0)
+    starts_at: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
+    ends_at: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
