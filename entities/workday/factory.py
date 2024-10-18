@@ -17,7 +17,7 @@ class Factory(BaseFactory):
     async def seed(self, worktimes: list[Worktime], doctors: list[Doctor]):
         fakes: list[Workday] = []
         today = date.today()
-        last_day = today + timedelta(weeks = 3)
+        last_day = today + timedelta(weeks = 5)
         curr_day = today - timedelta(weeks = 2)
 
         while curr_day < last_day:
