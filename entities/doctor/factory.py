@@ -1,10 +1,9 @@
 from random import choice
-from datetime import date
+from datetime import date, timedelta
 
 from utils.bases import BaseFactory
 from entities.user import User
 from entities.category import Category
-from entities.building import Building
 from entities.room import Room
 from entities.role import RoleID
 from .entity import Doctor
@@ -36,7 +35,7 @@ class Factory(BaseFactory):
             office = choice(rooms),
             avatar_url = choice(avatar_urls),
             career_started_on = self.fake.date_between(
-                start_date = user.birth_date,
+                start_date = user.birth_date + timedelta(days = 16 * 365),
                 end_date = date.today()
             )
         ) for user in users if user.role_id == RoleID.DOCTOR.value]

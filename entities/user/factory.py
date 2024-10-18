@@ -1,8 +1,9 @@
 from random import randint, choice
+from datetime import date, timedelta
 
 from utils.bases import BaseFactory
 from utils.facades import hash, calc
-from entities.role import Role
+from entities.role import RoleID
 from .entity import User
 
 
@@ -15,16 +16,18 @@ def iin_from(date: str, num: int) -> str:
 
 
 class Factory(BaseFactory):
-    async def seed(self, count: int, roles: list[Role]):
+    async def seed(self, count: int):
         fakes: list[User] = []
 
         for _ in range(count):
-            birth_date = calc.str_to_time(self.fake.date(), self.date_format).date()
+            role = self.get_role(87, 10)
+            birth_date = self.get_birth_date(role)
             password = self.fake.password()
             [name, surname, *_] = self.fake.name().split(' ')
+
             fakes.append(User(
                 email = self.fake.email(),
-                role = choice(roles),
+                role_id = role.value,
                 iin = iin_from(birth_date, randint(1, 10**6 - 1)),
                 name = name,
                 surname = surname,
@@ -36,3 +39,27 @@ class Factory(BaseFactory):
             
         await self.flush(fakes)
         return fakes
+
+
+    def get_role(self, patient_probability: int, doctor_probability: int) -> RoleID:
+        return (
+            RoleID.PATIENT if self.fake.boolean(patient_probability) else
+            RoleID.DOCTOR if self.fake.boolean(100 * doctor_probability/(100 - patient_probability)) else
+            RoleID.MANAGER
+        )
+
+
+    def get_birth_date(self, role: RoleID) -> date:
+        today = date.today()
+        return (
+            self.fake.date_between(
+                today - timedelta(days = 60 * 365),
+                today - timedelta(days = 20 * 365)
+            ) if role == RoleID.DOCTOR else self.fake.date_between(
+                today - timedelta(days = 60 * 365),
+                today - timedelta(days = 20 * 365)
+            ) if role == RoleID.MANAGER else self.fake.date_between(
+                today - timedelta(days = 100 * 365),
+                today
+            )
+        )

@@ -1,14 +1,53 @@
 from pytest import mark
-from httpx import AsyncClient, ASGITransport
+from httpx import AsyncClient
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from entities.user import UserQuery, UserAsPrimary
-from routes.auth import SignInReq
+from entities.doctor import DoctorQuery, DoctorAsPrimary
+from entities.worktime import WorktimeQuery
+from entities.workday import WorkdayQuery
+from routes.patient.doctors import DoctorAsElement, ScheduleRes
 from tests.utils.app import anyio_backend, client
 from tests.utils.db import temp_db
 
 
 @mark.anyio
 async def test_search_doctor(client: AsyncClient, temp_db: AsyncSession, anyio_backend):
-    response = await client.get('/doctors')
+    for doctor in await DoctorQuery(temp_db).get_random(10):
+        name = doctor.profile.name
+        surname = doctor.profile.surname
+        for fullname in [f'{name} {surname}', f'{surname} {name}']:
+            response = await client.get('/patient/doctors', params = { 'fullname': fullname })
+            response_data: list[DoctorAsElement] = response.json()
+
+            assert response.status_code == status.HTTP_200_OK
+            assert len(response_data) == 1
+            assert response_data[0] == DoctorAsElement.to_json(doctor)
+
+
+@mark.anyio
+async def test_doctor_profile(client: AsyncClient, temp_db: AsyncSession, anyio_backend):
+    for doctor in await DoctorQuery(temp_db).get_random(10):
+        response = await client.get(f'/patient/doctors/{doctor.id}')
+        response_data: DoctorAsPrimary = response.json()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data == DoctorAsPrimary.to_json(doctor)
+
+
+@mark.anyio
+async def test_doctor_schedule(client: AsyncClient, temp_db: AsyncSession, anyio_backend):
+    for doctor in await DoctorQuery(temp_db).get_random(10):
+        for week_num in range(3):
+            response = await client.get(f'/patient/doctors/{doctor.id}/{week_num}')
+            response_data: ScheduleRes = response.json()
+
+            assert response.status_code == status.HTTP_200_OK
+            assert response_data == ScheduleRes.to_json(
+                worktime = await WorktimeQuery(temp_db).get_actual(),
+                schedule = await WorkdayQuery(temp_db).get_schedule(
+                    doctor = doctor,
+                    week_num = week_num
+                ),
+                me = None
+            )

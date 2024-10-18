@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from .auth.api import router as auth_router
 from .resources import resources_router
-from .doctors.api import router as doctors_router
+from .doctors import doctors_router
 
 
 patient_router = APIRouter(prefix = '/patient')

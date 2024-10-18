@@ -10,7 +10,7 @@ from entities.worktime import WorktimeQuery
 from entities.workday import WorkdayQuery, CURR_WEEK_NUM
 from entities.appointment_type import AppointmentTypeQuery
 from entities.slot import SlotQuery
-from .types import DoctorAsElement, Schedule, MakeAppointmentReq
+from .types import DoctorAsElement, ScheduleRes, MakeAppointmentReq
 
 
 router = APIRouter()
@@ -19,9 +19,9 @@ router = APIRouter()
 @router.get('', response_model = DoctorAsElement)
 async def search_doctors(
     fullname: str | None = Query(None),
-    categories: list[int] | None = Query(None),
+    categories: list[int] | None = Query(None, alias = 'categories[]'),
     min_exp_years: int | None = Query(None),
-    offices: list[int] | None = Query(None),
+    offices: list[int] | None = Query(None, alias = 'offices[]'),
     sort_by: str = Query('name'),
     asc_order: bool = Query(True),
     db: AsyncSession = Depends(connect_db)
@@ -54,7 +54,7 @@ async def doctor_profile(
     )
 
 
-@router.get('/{id}/{week_num}', response_model = Schedule)
+@router.get('/{id}/{week_num}', response_model = ScheduleRes)
 async def doctor_profile(
     id: int = Path(gt = 0),
     week_num: int = Path(ge = CURR_WEEK_NUM, le = 3),
@@ -64,7 +64,7 @@ async def doctor_profile(
     doctor = await DoctorQuery(db).get(id)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
-        content = Schedule.to_json(
+        content = ScheduleRes.to_json(
             worktime = await WorktimeQuery(db).get_actual(),
             schedule = await WorkdayQuery(db).get_schedule(doctor, week_num),
             me = me
@@ -72,7 +72,7 @@ async def doctor_profile(
     )
 
 
-@router.post('/{id}/{week_num}', response_model = Schedule)
+@router.post('/{id}/{week_num}', response_model = ScheduleRes)
 async def make_appointment(
     id: int = Path(gt = 0),
     week_num: int = Path(ge = CURR_WEEK_NUM, le = 3),
@@ -92,7 +92,7 @@ async def make_appointment(
     return JSONResponse(
         status_code = status.HTTP_201_CREATED,
         headers = auth.get_auth_headers(me),
-        content = Schedule.to_json(
+        content = ScheduleRes.to_json(
             worktime = await WorktimeQuery(db).get_actual(),
             schedule = await workday_query.get_schedule(doctor, week_num),
             me = me

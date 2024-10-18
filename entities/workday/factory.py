@@ -14,16 +14,11 @@ def date_assignable(worktime: Worktime, day: date) -> bool:
 
 
 class Factory(BaseFactory):
-    async def seed(
-        self,
-        start_date: date,
-        worktimes: list[Worktime],
-        doctors: list[Doctor]
-    ):
+    async def seed(self, worktimes: list[Worktime], doctors: list[Doctor]):
         fakes: list[Workday] = []
-
-        last_day = date.today() + timedelta(weeks = 3)
-        curr_day = start_date
+        today = date.today()
+        last_day = today + timedelta(weeks = 3)
+        curr_day = today - timedelta(weeks = 2)
 
         while curr_day < last_day:
             worktime = [

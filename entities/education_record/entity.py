@@ -15,6 +15,7 @@ class EducationRecord(BaseEntity):
     doctor_id = Column(Integer, ForeignKey('doctors.id'), primary_key = True)
     record_id = Column(Integer, primary_key = True)
     organization = Column(String(50), nullable = False)
+    speciality = Column (String(75), nullable = False)
     start_year = Column(Integer, nullable=False)
     end_year = Column(Integer, nullable=False)
     gpa = Column(Float, nullable=False)

@@ -10,12 +10,12 @@ class Factory(BaseFactory):
     async def seed(self, doctors: list[Doctor], types: list[AppointmentType]):
         fakes: list[Price] = []
         for doctor in doctors:
-            for type in types:
-                if self.fake.boolean(75):
-                    fakes.append(Price(
-                        doctor = doctor,
-                        appointment_type = type,
-                        half_hour_price = randint(5, 25) * 1000
-                    ))        
+            base_price = randint(5, 25) * 1000
+            for index, type in enumerate(types):
+                fakes.append(Price(
+                    doctor = doctor,
+                    appointment_type = type,
+                    half_hour_price = base_price * (index + 1)
+                ))        
         await self.flush(fakes)
         return fakes

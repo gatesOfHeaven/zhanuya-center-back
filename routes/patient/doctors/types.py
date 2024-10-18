@@ -53,7 +53,7 @@ class DoctorAsPage(BaseModel):
         ).model_dump()
     
 
-class Schedule(BaseModel):
+class ScheduleRes(BaseModel):
     worktime: WorktimeAsForeign
     schedule: list[WorkdayAsPrimary]
 
@@ -62,7 +62,7 @@ class Schedule(BaseModel):
         schedule: list[Workday],
         me: User | None
     ):
-        return Schedule(
+        return ScheduleRes(
             worktime = WorktimeAsForeign.to_json(worktime),
             schedule = [
                 WorkdayAsPrimary.to_json(workday, me)

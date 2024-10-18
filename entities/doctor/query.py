@@ -86,3 +86,15 @@ class Query(BaseQuery):
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f'Invalid sort_by field: {sort_by}')
         return (await self.db.execute(query)).scalars().all()
+    
+    
+    async def get_random(self, count: int) -> list[Doctor]:
+        query = select(Doctor).options(
+            joinedload(Doctor.profile),
+            joinedload(Doctor.category),
+            joinedload(Doctor.price_list).joinedload(Price.appointment_type),
+            joinedload(Doctor.office).joinedload(Room.building),
+            joinedload(Doctor.experience),
+            joinedload(Doctor.education)
+        ).order_by(func.random()).limit(count)
+        return (await self.db.execute(query)).unique().scalars().all()

@@ -24,8 +24,8 @@ from entities.slot.factory import Factory as SlotFactory
 
 async def seed(db: AsyncSession):
     worktimes = await WorktimeFactory(db).seed()
-    roles = await RoleFactory(db).seed()
-    users = await UserFactory(db).seed(100, roles)
+    await RoleFactory(db).seed()
+    users = await UserFactory(db).seed(500)
     await EmailVerificationFactory(db).seed(users)
     categories = await CategoryFactory(db).seed()
     buildings = await BuildingFactory(db).seed(3)
@@ -35,7 +35,7 @@ async def seed(db: AsyncSession):
     await PriceFactory(db).seed(doctors, appointment_types)
     await EducationRecordFactory(db).seed(doctors, users)
     await ExperienceRecordFactory(db).seed(doctors, users, categories)
-    workdays = await WorkdayFactory(db).seed(date(2024, 9, 30), worktimes, doctors)
+    workdays = await WorkdayFactory(db).seed(worktimes, doctors)
     await LunchFactory(db).seed(workdays)
     await SlotFactory(db).seed(workdays, users, appointment_types)
 

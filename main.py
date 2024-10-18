@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from utils.db import lifespan
+from utils.middlewares import DecodeBracketsMiddleware
 from routes.auth import auth_router
 from routes.patient import patient_router
 from dotenv import load_dotenv
@@ -19,7 +20,7 @@ app = FastAPI(
 app.include_router(auth_router, prefix = '/auth')
 app.include_router(patient_router)
 
-
+app.add_middleware(DecodeBracketsMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins = ['*'],
