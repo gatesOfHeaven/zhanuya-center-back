@@ -3,14 +3,14 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.db import connect_db
-from utils.facades import auth
+from utils.facades import auth, calc
 from entities.user import User
 from entities.doctor import DoctorQuery, DoctorAsPrimary
 from entities.worktime import WorktimeQuery
 from entities.workday import WorkdayQuery, CURR_WEEK_NUM
 from entities.appointment_type import AppointmentTypeQuery
-from entities.slot import SlotQuery
-from .types import DoctorAsElement, ScheduleRes, MakeAppointmentReq
+from entities.slot import SlotQuery, MakeAppointmentReq
+from .types import DoctorAsElement, ScheduleRes
 
 
 router = APIRouter()
@@ -55,7 +55,7 @@ async def doctor_profile(
 
 
 @router.get('/{id}/{week_num}', response_model = ScheduleRes)
-async def doctor_profile(
+async def doctor_schedule(
     id: int = Path(gt = 0),
     week_num: int = Path(ge = CURR_WEEK_NUM, le = 3),
     me: User | None = Depends(auth.authenticate_me_if_token),
@@ -82,12 +82,17 @@ async def make_appointment(
 ):
     workday_query = WorkdayQuery(db)
     doctor = await DoctorQuery(db).get(id)
+    workday = await workday_query.get(
+        doctor = doctor,
+        day = calc.str_to_time(request_data.date, '%d.%m.%Y').date()
+    )
+    
     await SlotQuery(db).new(
         patient = me,
-        workday = await workday_query.get(doctor, request_data.date),
-        type = await AppointmentTypeQuery(db).get(request_data.type_id),
-        starts_at = request_data.starts_at,
-        ends_at = request_data.ends_at
+        workday = workday,
+        appointment_type = await AppointmentTypeQuery(db).get(request_data.type_id),
+        starts_at = calc.str_to_time(request_data.starts_at, '%H:%M:%S').time(),
+        ends_at = calc.str_to_time(request_data.ends_at, '%H:%M:%S').time()
     )
     return JSONResponse(
         status_code = status.HTTP_201_CREATED,

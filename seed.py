@@ -43,6 +43,7 @@ async def seed(db: AsyncSession):
 async def main():
     async with engine.begin() as conn:
         metadata: MetaData = BaseEntity.metadata
+        await conn.run_sync(metadata.drop_all)
         await conn.run_sync(metadata.create_all)
     
     async with asyncSession() as db:

@@ -1,0 +1,1 @@
+from .api import router as appointments_router

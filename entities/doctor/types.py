@@ -45,3 +45,20 @@ class DoctorAsPrimary(BaseModel):
                 for record in doctor.education
             ]
         ).model_dump()
+
+
+class DoctorAsForeign(BaseModel):
+    id: int
+    name: str
+    surname: str
+    avatarUrl: str
+    expInMonthes: int
+
+    def to_json(doctor: Doctor):
+        return DoctorAsForeign(
+            id = doctor.id,
+            name = doctor.profile.name,
+            surname = doctor.profile.surname,
+            avatarUrl = doctor.avatar_url,
+            expInMonthes = calc.get_monthes(doctor.career_started_on)
+        ).model_dump()

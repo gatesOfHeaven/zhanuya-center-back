@@ -29,3 +29,16 @@ class UserAsPrimary(BaseModel):
             iin = user.iin,
             role = user.role.name
         ).model_dump()
+    
+
+class PatientAsForeign(BaseModel):
+    id: int
+    name: str
+    surname: str
+
+    def to_json(user: User):
+        return PatientAsForeign(
+            id = user.id,
+            name = user.name,
+            surname = user.surname
+        ).model_dump()

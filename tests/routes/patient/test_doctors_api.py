@@ -1,4 +1,4 @@
-from pytest import mark
+from pytest import mark, fixture
 from httpx import AsyncClient
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,13 +11,23 @@ from tests.utils.app import anyio_backend, client
 from tests.utils.db import temp_db
 
 
+@fixture
+def route() -> str:
+    return '/patient/doctors'
+
+
 @mark.anyio
-async def test_search_doctor(client: AsyncClient, temp_db: AsyncSession, anyio_backend):
+async def test_search_doctor(
+    client: AsyncClient,
+    route: str,
+    temp_db: AsyncSession,
+    anyio_backend
+):
     for doctor in await DoctorQuery(temp_db).get_random(10):
         name = doctor.profile.name
         surname = doctor.profile.surname
         for fullname in [f'{name} {surname}', f'{surname} {name}']:
-            response = await client.get('/patient/doctors', params = { 'fullname': fullname })
+            response = await client.get(route, params = { 'fullname': fullname })
             response_data: list[DoctorAsElement] = response.json()
 
             assert response.status_code == status.HTTP_200_OK
@@ -26,9 +36,14 @@ async def test_search_doctor(client: AsyncClient, temp_db: AsyncSession, anyio_b
 
 
 @mark.anyio
-async def test_doctor_profile(client: AsyncClient, temp_db: AsyncSession, anyio_backend):
+async def test_doctor_profile(
+    client: AsyncClient,
+    route: str,
+    temp_db: AsyncSession,
+    anyio_backend
+):
     for doctor in await DoctorQuery(temp_db).get_random(10):
-        response = await client.get(f'/patient/doctors/{doctor.id}')
+        response = await client.get(f'{route}/{doctor.id}')
         response_data: DoctorAsPrimary = response.json()
 
         assert response.status_code == status.HTTP_200_OK
@@ -36,10 +51,15 @@ async def test_doctor_profile(client: AsyncClient, temp_db: AsyncSession, anyio_
 
 
 @mark.anyio
-async def test_doctor_schedule(client: AsyncClient, temp_db: AsyncSession, anyio_backend):
+async def test_doctor_schedule(
+    client: AsyncClient,
+    route: str,
+    temp_db: AsyncSession,
+    anyio_backend
+):
     for doctor in await DoctorQuery(temp_db).get_random(10):
         for week_num in range(3):
-            response = await client.get(f'/patient/doctors/{doctor.id}/{week_num}')
+            response = await client.get(f'{route}/{doctor.id}/{week_num}')
             response_data: ScheduleRes = response.json()
 
             assert response.status_code == status.HTTP_200_OK

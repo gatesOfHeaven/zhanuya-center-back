@@ -1,18 +1,20 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
-from datetime import date
+from datetime import date, time
+from typing import Callable
 
 from utils.bases import BaseQuery
 from utils.facades import week
 from entities.doctor import Doctor
+from entities.slot import Slot
 from .entity import Workday
 
 
 class Query(BaseQuery):
     async def get(self, doctor: Doctor, day: date) -> Workday:
         query = select(Workday).where(
-            Workday.doctor_id == doctor.id,
+            Workday.doctor == doctor,
             Workday.date == day
         ).options(
             joinedload(Workday.doctor),
@@ -27,11 +29,20 @@ class Query(BaseQuery):
             )
         return workday
 
+
     async def get_schedule(self, doctor: Doctor, week_num: int) -> list[Workday]:
-        schedule: list[Workday] = []
-        for day in week.get_week(week_num = week_num):
-            workday = await self.get(doctor, day)
-            if workday is not None:
-                schedule.append(workday)
-        return schedule
-        
+        query = select(Workday).where(
+            Workday.doctor == doctor,
+            Workday.date.in_(week.get_week(week_num = week_num))
+        ).options(
+            joinedload(Workday.lunch),
+            joinedload(Workday.slots)
+        )
+        workdays:list[Workday] = (await self.db.execute(query)).unique().scalars().all()
+
+        day_comparator: Callable[[Workday], date] = lambda day: day.date
+        workdays.sort(key = day_comparator)
+        slot_comparator: Callable[[Slot], time] = lambda slot: slot.starts_at
+        for workday in workdays:
+            workday.slots.sort(key = slot_comparator)
+        return workdays

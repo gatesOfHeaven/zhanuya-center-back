@@ -12,7 +12,7 @@ load_dotenv()
 
 
 app = FastAPI(
-    title = 'Zhanuya Medical Center😷',
+    title = 'Happy Patient Medical Center😷',
     lifespan = lifespan,
     redirect_slashes = False
 )

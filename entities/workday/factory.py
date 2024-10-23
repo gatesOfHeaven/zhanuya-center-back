@@ -8,9 +8,7 @@ from .entity import Workday
 
 
 def date_assignable(worktime: Worktime, day: date) -> bool:
-    return worktime.end_date is None or (
-        worktime.start_date <= day and day <= worktime.end_date
-    )
+    return worktime.end_date is None or (worktime.start_date <= day <= worktime.end_date)
 
 
 class Factory(BaseFactory):

@@ -5,7 +5,7 @@ from entities.doctor import Doctor
 from entities.category import Category, CategoryAsForeign
 from entities.doctor import Doctor
 from entities.building import Building, BuildingAsForeign
-from entities.appointment_type import AppointmentType, AppointmentTypeAsForeign
+from entities.appointment_type import AppointmentType, AppointmentTypeAsPrimary
 
 
 class DoctorsAsResource(BaseModel):
@@ -25,7 +25,7 @@ class ResourcesRes(BaseModel):
     doctors: list[DoctorsAsResource]
     categories: list[CategoryAsForeign]
     offices: list[BuildingAsForeign]
-    appointment_types: list[AppointmentTypeAsForeign]
+    appointment_types: list[AppointmentTypeAsPrimary]
 
     def to_json(
         doctors: list[Doctor],
@@ -38,7 +38,7 @@ class ResourcesRes(BaseModel):
             categories = [CategoryAsForeign.to_json(category) for category in categories],
             offices = [BuildingAsForeign.to_json(office) for office in offices],
             appointment_types = [
-                AppointmentTypeAsForeign.to_json(type)
+                AppointmentTypeAsPrimary.to_json(type)
                 for type in appointment_types
             ]
         ).model_dump()

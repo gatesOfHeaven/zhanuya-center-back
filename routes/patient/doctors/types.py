@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from utils.facades import calc
 from entities.user import User
@@ -69,10 +69,3 @@ class ScheduleRes(BaseModel):
                 for workday in schedule
             ]
         ).model_dump()
-    
-
-class MakeAppointmentReq(BaseModel):
-    date: str = Field(pattern = r'\d{2}\.\d{2}\.\d{4}')
-    type_id: int = Field(gt = 0)
-    starts_at: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
-    ends_at: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
