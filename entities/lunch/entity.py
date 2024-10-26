@@ -6,7 +6,6 @@ from utils.bases import BaseEntity
 
 if TYPE_CHECKING:
     from entities.workday import Workday
-    from entities.slot import Slot
 
 
 class Lunch(BaseEntity):

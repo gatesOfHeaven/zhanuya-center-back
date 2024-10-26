@@ -1,3 +1,9 @@
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase
+from typing import TypeVar
 
-BaseEntity = declarative_base()
+
+class BaseEntity(DeclarativeBase):
+    ...
+
+
+Entity = TypeVar('Entity', bound = BaseEntity)

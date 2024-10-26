@@ -2,16 +2,28 @@ from fastapi import APIRouter, Path, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.db import connect_db
+from utils import connect_db
 from utils.bases import BaseResponse
 from utils.facades import auth, calc
 from entities.user import User
 from entities.appointment_type import AppointmentTypeQuery
 from entities.workday import WorkdayQuery
-from entities.slot import SlotQuery, SlotAsPrimary, MakeAppointmentReq
+from entities.slot import SlotQuery, SlotAsPrimary, MakeAppointmentReq, MySlotAsElement
 
 
 router = APIRouter()
+
+
+@router.get('', response_model = list[MySlotAsElement])
+async def my_appointments(
+    me: User = Depends(auth.authenticate_me),
+    db: AsyncSession = Depends(connect_db)
+):
+    appointments = await SlotQuery(db).my(me)
+    return JSONResponse([
+        MySlotAsElement.to_json(appointment, index)
+        for index, appointment in enumerate(appointments, 1)
+    ])
 
 
 @router.get('/{id}', response_model = SlotAsPrimary)

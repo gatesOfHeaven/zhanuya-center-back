@@ -25,7 +25,7 @@ class Query(BaseQuery):
         query = select(exists(User).where(
             or_(User.email == email, User.iin == iin)
         ))
-        credentials_used = (await self.db.execute(query)).scalar()
+        credentials_used = await self.field(query)
         if credentials_used:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
@@ -67,7 +67,7 @@ class Query(BaseQuery):
 
     async def iin_is_available(self, iin: str) -> bool:
         query = select(exists(User).where(User.iin == iin))
-        return not (await self.db.execute(query)).scalar()
+        return not await self.field(query)
 
 
     async def get_by_iin(self, iin: str, password_hash: str) -> User:

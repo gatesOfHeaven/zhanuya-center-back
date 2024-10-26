@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.db import connect_db
+from utils import connect_db
 from entities.doctor import DoctorQuery
 from entities.category import CategoryQuery
 from entities.building import BuildingQuery

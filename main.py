@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from utils.db import lifespan
+from utils import lifespan
 from utils.middlewares import DecodeBracketsMiddleware
 from routes.auth import auth_router
 from routes.patient import patient_router

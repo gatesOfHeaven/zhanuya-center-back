@@ -6,7 +6,7 @@ from fastapi import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.db import connect_db
+from utils import connect_db
 from entities.user import User, UserQuery
 from .core import generate_token, authenticate_token
 

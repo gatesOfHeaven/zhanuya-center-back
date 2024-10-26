@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.db import connect_db
+from utils import connect_db
 from utils.facades import auth, hash, typo
 from entities.user import UserQuery, UserAsPrimary
 from .types import SignInReq

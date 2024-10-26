@@ -1,11 +1,12 @@
 from fastapi import status, HTTPException
 from sqlalchemy import select, exists
 from sqlalchemy.orm import joinedload
-from datetime import time
+from datetime import datetime, time, timedelta
 
 from utils.bases import BaseQuery
 from entities.user import User
 from entities.doctor import Doctor
+from entities.role import RoleID
 from entities.workday import Workday
 from entities.appointment_type import AppointmentType
 from entities.room import Room
@@ -14,8 +15,9 @@ from .validator import Validator
 
 
 class Query(BaseQuery):
-    async def get(self, id: int, me: User) -> Slot:
-        query = select(Slot).options(
+    def __init__(self, db):
+        super().__init__(db)
+        self.select_with_relations = select(Slot).options(
             (joinedload(Slot.workday)
                 .joinedload(Workday.doctor)
                 .joinedload(Doctor.profile)
@@ -31,7 +33,11 @@ class Query(BaseQuery):
             ),
             joinedload(Slot.patient),
             joinedload(Slot.type)
-        ).where(Slot.id == id)
+        )
+
+
+    async def get(self, id: int, me: User) -> Slot:
+        query = self.select_with_relations.where(Slot.id == id)
         slot = (await self.db.execute(query)).scalar_one_or_none()
         if slot is None:
             raise HTTPException(
@@ -75,6 +81,18 @@ class Query(BaseQuery):
         return slot
     
 
+    async def my(self, me: User) -> list[Slot]:
+        query = self.select_with_relations.where(Slot.patient_id == me.id)
+        return await self.all(query)
+    
+
+    async def upcomings(self) -> list[Slot]:
+        query = self.select_with_relations.where(
+            datetime.combine(Slot.date, Slot.starts_at) - datetime.now() <= timedelta(minutes = 30)
+        )
+        return await self.all(query)
+        
+
     async def edit(
         self,
         slot: Slot,
@@ -114,7 +132,7 @@ class Query(BaseQuery):
             Slot.ends_at > slot.starts_at,
             Slot.id != slot.id
         ))
-        slot_is_busy = (await self.db.execute(query)).scalar()
+        slot_is_busy = await self.field(query)
         if slot_is_busy:
             raise HTTPException(
                 status.HTTP_406_NOT_ACCEPTABLE,
@@ -129,8 +147,8 @@ class Query(BaseQuery):
             Slot.ends_at > slot.starts_at,
             Slot.patient_id == me.id
         ))
-        i_am_busy = (await self.db.execute(query)).scalar()
-        if i_am_busy:
+        am_i_busy = await self.field(query)
+        if am_i_busy:
             raise HTTPException(
                 status.HTTP_406_NOT_ACCEPTABLE,
                 'You Have Another Appointment At This Time'

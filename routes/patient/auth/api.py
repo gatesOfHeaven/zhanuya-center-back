@@ -3,7 +3,8 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from random import randint
 
-from utils.db import connect_db
+from utils import connect_db
+from utils.bases import BaseResponse
 from utils.facades import auth, hash, mail
 from entities.user import User, UserQuery, UserAsPrimary
 from entities.email_verification import EmailVerificationQuery
@@ -13,9 +14,10 @@ from .types import SendVerificationReq, VerificationConflictElement, SignUpReq, 
 router = APIRouter()
 
 
-verification_responses = { status.HTTP_409_CONFLICT: {
-    'model': list[VerificationConflictElement]
-}}
+verification_responses = {
+    status.HTTP_202_ACCEPTED: { 'model': BaseResponse },
+    status.HTTP_409_CONFLICT: { 'model': list[VerificationConflictElement] }
+}
 
 
 @router.post('', responses = verification_responses)
@@ -50,11 +52,18 @@ async def send_verification_code(
 
     try:
         await db.commit()
-        mail.send_verification_code(request_data.email, verification_code)
+        await mail.send(
+            request_data.email,
+            'Email Verification',
+            f'Your verification code is {verification_code}'
+        )
     except:
         await db.rollback()
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-    return JSONResponse(status_code = 202, content = {})
+    return JSONResponse(
+        status_code = 202,
+        content = BaseResponse.to_json('Verification Code is sent to your Email')
+    )
 
 
 @router.post('/sign-up', response_model = SignUpRes)

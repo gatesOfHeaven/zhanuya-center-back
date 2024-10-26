@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from main import app
 from seed import seed
-from utils.db import connect_db, asyncSession
+from utils import connect_db, asyncSession
 from utils.bases import BaseEntity
 
 

@@ -1,9 +1,7 @@
-from sqlalchemy import MetaData
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import date
 
-from utils.db import engine, asyncSession
+from utils import engine, asyncSession
 from utils.bases import BaseEntity
 from entities.worktime.factory import Factory as WorktimeFactory
 from entities.role.factory import Factory as RoleFactory
@@ -42,9 +40,8 @@ async def seed(db: AsyncSession):
 
 async def main():
     async with engine.begin() as conn:
-        metadata: MetaData = BaseEntity.metadata
-        await conn.run_sync(metadata.drop_all)
-        await conn.run_sync(metadata.create_all)
+        await conn.run_sync(BaseEntity.metadata.drop_all)
+        await conn.run_sync(BaseEntity.metadata.create_all)
     
     async with asyncSession() as db:
         db: AsyncSession
