@@ -16,6 +16,7 @@ class Slot(BaseEntity):
     id = Column(Integer, primary_key = True)
     doctor_id = Column(Integer, nullable = False)
     date = Column(Date, nullable = False)
+    index = Column(Integer, nullable = False)
     patient_id = Column(Integer, ForeignKey('users.id'), nullable = False)
     type_id = Column(Integer, ForeignKey('appointment_types.id'), nullable = False)
     starts_at = Column(Time, nullable = False)

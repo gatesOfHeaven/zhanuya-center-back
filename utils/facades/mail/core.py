@@ -28,7 +28,6 @@ async def send(
     )
     try:
         await server.connect()
-        await server.starttls()
         await server.send_message(message)
     except SMTPException as e:
         print(f'SMTP error: {e}')

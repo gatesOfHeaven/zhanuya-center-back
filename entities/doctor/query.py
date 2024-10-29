@@ -32,7 +32,7 @@ class Query(BaseQuery):
 
     async def all(self) -> list[Doctor]:
         query = select(Doctor).options(joinedload(Doctor.profile))
-        return (await self.db.execute(query)).scalars().all()
+        return await self.all(query)
 
 
     async def search_and_filter(
@@ -85,7 +85,7 @@ class Query(BaseQuery):
         )
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f'Invalid sort_by field: {sort_by}')
-        return (await self.db.execute(query)).scalars().all()
+        return await self.all(query)
     
     
     async def get_random(self, count: int) -> list[Doctor]:

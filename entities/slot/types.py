@@ -12,15 +12,17 @@ from .entity import Slot
     
 
 class MakeAppointmentReq(BaseModel):
+    doctorId: int = Field(gt = 0)
     date: str = Field(pattern = r'\d{2}\.\d{2}\.\d{4}')
-    type_id: int = Field(gt = 0)
-    starts_at: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
-    ends_at: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
+    typeId: int = Field(gt = 0)
+    startsAt: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
+    endsAt: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
 
 
 class SlotAsPrimary(BaseModel):
     id: int
     date: str
+    index: int
     startTime: str
     endTime: str
     isFinished: bool
@@ -34,6 +36,7 @@ class SlotAsPrimary(BaseModel):
         return SlotAsPrimary(
             id = slot.id,
             date = calc.time_to_str(slot.workday.date),
+            index = slot.index,
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),
             isFinished = datetime.now() > datetime.combine(slot.date, slot.ends_at),
@@ -72,10 +75,10 @@ class MySlotAsElement(BaseModel):
     room: RoomAsPrimary
     doctor: DoctorAsForeign
 
-    def to_json(slot: Slot, index: int):
+    def to_json(slot: Slot):
         return MySlotAsElement(
             id = slot.id,
-            index = index,
+            index = slot.index,
             date = calc.time_to_str(slot.workday.date),
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),

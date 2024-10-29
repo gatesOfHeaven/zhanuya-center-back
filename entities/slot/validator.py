@@ -31,23 +31,22 @@ class Validator:
 
     @staticmethod
     def validate_workday_time(slot: Slot):
-        start_out_of_workday = not slot.workday.starts_at <= slot.starts_at < slot.workday.ends_at
-        end_out_of_workday = not slot.workday.starts_at < slot.ends_at <= slot.workday.ends_at
-
-        if start_out_of_workday or end_out_of_workday:
+        start = slot.workday.starts_at
+        end = slot.workday.ends_at
+        if not (start <= slot.starts_at < end and start < slot.ends_at <= end):
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 'Slot time is outside workday hours'
             )
         
-        if slot.workday.lunch and (
-            (slot.workday.lunch.starts_at <= slot.ends_at <= slot.workday.lunch.ends_at) or
-            (slot.workday.lunch.starts_at <= slot.starts_at <= slot.workday.lunch.ends_at)
-        ):
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                'Slot overlaps with lunch break'
-            )
+        if slot.workday.lunch:
+            start = slot.workday.lunch.starts_at
+            end = slot.workday.lunch.ends_at
+            if start < slot.ends_at <= end or start <= slot.starts_at < end:
+                raise HTTPException(
+                    status.HTTP_403_FORBIDDEN,
+                    'Slot overlaps with lunch break'
+                )
         
 
     @staticmethod

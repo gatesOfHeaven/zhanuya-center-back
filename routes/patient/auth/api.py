@@ -5,13 +5,13 @@ from random import randint
 
 from utils import connect_db
 from utils.bases import BaseResponse
-from utils.facades import auth, hash, mail
+from utils.facades import auth, hash, mail, calc
 from entities.user import User, UserQuery, UserAsPrimary
 from entities.email_verification import EmailVerificationQuery
 from .types import SendVerificationReq, VerificationConflictElement, SignUpReq, SignUpRes
 
 
-router = APIRouter()
+router = APIRouter(tags = ['auth'])
 
 
 verification_responses = {
@@ -57,7 +57,8 @@ async def send_verification_code(
             'Email Verification',
             f'Your verification code is {verification_code}'
         )
-    except:
+    except Exception as e:
+        print(e)
         await db.rollback()
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return JSONResponse(
@@ -83,7 +84,7 @@ async def sign_up(
         email = request_data.email,
         iin = request_data.iin,
         gender = request_data.gender,
-        birth_date = request_data.birthDate,
+        birth_date = calc.str_to_time(request_data.birthDate, '%d-%m-%Y').date(),
         password = request_data.password, # test only
         password_hash = hash.it(request_data.password),
         commit = False

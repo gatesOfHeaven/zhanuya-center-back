@@ -10,7 +10,7 @@ from .values import code_expiring_mins
 class Query(BaseQuery):
     async def get(self, email: str) -> EmailVerification | None:
         query = select(EmailVerification).where(EmailVerification.email == email)
-        verification_record = (await self.db.execute(query)).scalar_one_or_none()
+        verification_record = await self.first(query)
         if verification_record is None: return None
 
         expired: bool = verification_record.expires_at < datetime.now()

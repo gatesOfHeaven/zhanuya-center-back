@@ -13,7 +13,7 @@ class Query(BaseQuery):
             .where(Worktime.end_date == None)
             .order_by(Worktime.start_date.desc())
         )
-        return (await self.db.execute(query)).scalar_one_or_none()
+        return await self.first(query)
 
 
     async def get_actual(self) -> Worktime:

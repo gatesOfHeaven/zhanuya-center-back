@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Path, Body, Depends
+from fastapi import APIRouter, status, Path, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,12 +6,13 @@ from utils import connect_db
 from utils.bases import BaseResponse
 from utils.facades import auth, calc
 from entities.user import User
+from entities.doctor import DoctorQuery
 from entities.appointment_type import AppointmentTypeQuery
 from entities.workday import WorkdayQuery
 from entities.slot import SlotQuery, SlotAsPrimary, MakeAppointmentReq, MySlotAsElement
 
 
-router = APIRouter()
+router = APIRouter(tags = ['appointments'])
 
 
 @router.get('', response_model = list[MySlotAsElement])
@@ -20,10 +21,34 @@ async def my_appointments(
     db: AsyncSession = Depends(connect_db)
 ):
     appointments = await SlotQuery(db).my(me)
-    return JSONResponse([
-        MySlotAsElement.to_json(appointment, index)
-        for index, appointment in enumerate(appointments, 1)
-    ])
+    return JSONResponse(
+        headers = auth.get_auth_headers(me),
+        content = [MySlotAsElement.to_json(appointment) for appointment in appointments]
+    )
+
+
+@router.post('', response_model = BaseResponse)
+async def make_appointment(
+    request_data: MakeAppointmentReq = Body(),
+    me: User | None = Depends(auth.authenticate_me),
+    db: AsyncSession = Depends(connect_db)
+):
+    workday = await WorkdayQuery(db).get(
+        doctor = await DoctorQuery(db).get(request_data.doctorId),
+        day = calc.str_to_time(request_data.date, '%d.%m.%Y').date()
+    )
+    await SlotQuery(db).new(
+        patient = me,
+        workday = workday,
+        appointment_type = await AppointmentTypeQuery(db).get(request_data.typeId),
+        starts_at = calc.str_to_time(request_data.startsAt, '%H:%M:%S').time(),
+        ends_at = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time()
+    )
+    return JSONResponse(
+        status_code = status.HTTP_201_CREATED,
+        headers = auth.get_auth_headers(me),
+        content = BaseResponse.to_json('Appointment Created Successfully')
+    )
 
 
 @router.get('/{id}', response_model = SlotAsPrimary)

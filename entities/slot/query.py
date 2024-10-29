@@ -1,5 +1,5 @@
 from fastapi import status, HTTPException
-from sqlalchemy import select, exists
+from sqlalchemy import select, exists, func
 from sqlalchemy.orm import joinedload
 from datetime import datetime, time, timedelta
 
@@ -38,7 +38,7 @@ class Query(BaseQuery):
 
     async def get(self, id: int, me: User) -> Slot:
         query = self.select_with_relations.where(Slot.id == id)
-        slot = (await self.db.execute(query)).scalar_one_or_none()
+        slot = await self.first(query)
         if slot is None:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
@@ -75,6 +75,10 @@ class Query(BaseQuery):
         await self.verify_occupation(slot)
         Validator.validate_isnt_past(slot)
         await self.verify_am_i_free(slot, patient)
+
+        query = select(func.max(Slot.index)).where(Slot.patient == patient)
+        index = await self.field(query)
+        slot.index = 1 if index is None else index + 1
 
         self.db.add(slot)
         if commit: await self.commit()

@@ -17,7 +17,7 @@ class Query(BaseQuery):
         name: str,
         surname: str,
         gender: str,
-        birth_date: str,
+        birth_date: date,
         password: str, # test only
         password_hash: str,
         commit: bool = True
@@ -32,7 +32,6 @@ class Query(BaseQuery):
                 'This Credentials Already Taken'
             )
 
-        birth_date: date = calc.str_to_time(birth_date, '%d-%m-%Y').date()
         user = User(
             role_id = RoleID.PATIENT.value,
             email = email,
@@ -55,7 +54,7 @@ class Query(BaseQuery):
             User.email == email,
             User.password_hash == password_hash
         ).options(joinedload(User.role))
-        user = (await self.db.execute(query)).scalar_one_or_none()
+        user = await self.first(query)
 
         if not user:
             raise HTTPException(
@@ -75,7 +74,7 @@ class Query(BaseQuery):
             User.iin == iin,
             User.password_hash == password_hash
         ).options(joinedload(User.role))
-        user = (await self.db.execute(query)).scalar_one_or_none()
+        user = await self.first(query)
 
         if not user:
             raise HTTPException(
@@ -85,22 +84,15 @@ class Query(BaseQuery):
         return user
     
     
-    async def get_by_id(self, id: int) -> User:
+    async def get_by_id(self, id: int) -> User | None:
         query = select(User).where(User.id == id).options(
             joinedload(User.role)
         )
-        user = (await self.db.execute(query)).scalar_one_or_none()
-        
-        if not user:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
-                f'User[id={id}] Not Found'
-            )
-        return user
+        return await self.first(query)
     
 
     async def get_random(self, count: int) -> list[User]:
         query = select(User).options(
             joinedload(User.role)
         ).order_by(func.random()).limit(count)
-        return (await self.db.execute(query)).scalars().all()
+        return await self.all(query)

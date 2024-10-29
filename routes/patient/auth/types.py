@@ -19,7 +19,7 @@ class SignUpReq(BaseModel):
     email: str = Field(pattern = r'[^@]+@[^@]+\.[^@]+')
     iin: str = Field(min_length = 12, max_length = 12, pattern = r'^\d+$')
     gender: str = Field(min_length = 4, max_length = 6)
-    birthDate: str = Field(min_length = 10, max_length = 10)
+    birthDate: str = Field(pattern = r'\d{2}\-\d{2}\-\d{4}')
     emailVerificationCode: int
     password: str =Field(min_length = 8, max_length = 25, pattern = r'^[A-Za-z\d@$!%*?&]+$')
 

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from utils import lifespan
@@ -14,6 +15,7 @@ load_dotenv()
 app = FastAPI(
     title = 'Happy Patient Medical Center😷',
     lifespan = lifespan,
+    default_response_class = JSONResponse,
     redirect_slashes = False
 )
 

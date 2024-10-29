@@ -8,4 +8,4 @@ from .entity import Building
 class Query(BaseQuery):
     async def all(self) -> list[Building]:
         query = select(Building)
-        return (await self.db.execute(query)).scalars().all()
+        return await self.all(query)

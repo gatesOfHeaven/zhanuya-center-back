@@ -24,7 +24,7 @@ class BaseQuery:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-    async def field(self, query: Select[tuple[T]]) -> T:
+    async def field(self, query: Select[tuple[T]]) -> T | None:
         return (await self.db.execute(query)).scalar()
 
 

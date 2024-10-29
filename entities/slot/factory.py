@@ -31,10 +31,12 @@ class Factory(BaseFactory):
             while curr_time < workday.ends_at:
                 next_time = calc.add_times(curr_time, timedelta(minutes = 30))
                 if not is_lunch_time(workday, curr_time) and self.fake.boolean(75):
+                    patient = choice(patients)
                     fakes.append(Slot(
                         doctor_id = workday.doctor_id,
                         date = workday.date,
-                        patient = choice(patients),
+                        patient = patient,
+                        index = len([slot.index for slot in fakes if slot.patient == patient]) + 1,
                         type = choice(types),
                         starts_at = curr_time,
                         ends_at = next_time

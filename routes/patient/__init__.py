@@ -5,7 +5,7 @@ from .doctors import doctors_router
 from .appointments import appointments_router
 
 
-patient_router = APIRouter(prefix = '/patient')
+patient_router = APIRouter(prefix = '/patient', tags = ['for patient'])
 patient_router.include_router(auth_router, prefix = '/auth')
 patient_router.include_router(resources_router, prefix = '/resources')
 patient_router.include_router(doctors_router, prefix = '/doctors')

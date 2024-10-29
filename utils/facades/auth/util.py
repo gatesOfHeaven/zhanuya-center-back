@@ -21,8 +21,15 @@ async def authenticate_me(
     token: str = Header(alias='Auth'),
     db: AsyncSession = Depends(connect_db)
 ) -> User:
-    me = await UserQuery(db).get_by_id(authenticate_token(token))
-    if not me:
+    try:
+        me = await UserQuery(db).get_by_id(authenticate_token(token))
+    except:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            'Invalid Token'
+        )
+    
+    if me is None:
         raise HTTPException(
             status.HTTP_401_UNAUTHORIZED,
             'Invalid Token'
@@ -31,7 +38,7 @@ async def authenticate_me(
 
 
 async def authenticate_me_if_token(
-    token: str | None = Header(None, alias='Auth'),
+    token: str | None = Header(None, alias = 'Auth'),
     db: AsyncSession = Depends(connect_db)
 ) -> User | None:
-    return await authenticate_me(token, db) if token else None
+    return await UserQuery(db).get_by_id(authenticate_token(token)) if token else None
