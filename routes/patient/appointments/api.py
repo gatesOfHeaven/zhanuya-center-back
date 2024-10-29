@@ -73,17 +73,16 @@ async def edit_appointment(
 ):
     slot_query = SlotQuery(db)
     appointment = await slot_query.get(id, me)
-    print(appointment.workday.doctor.profile.surname)
     workday = await WorkdayQuery(db).get(
-        doctor = appointment.workday.doctor,
+        doctor = await DoctorQuery(db).get(request_data.doctorId),
         day = calc.str_to_time(request_data.date, '%d.%m.%Y').date()
     )
     appointment = await slot_query.edit(
         slot = appointment,
         workday = workday,
-        appointment_type = await AppointmentTypeQuery(db).get(request_data.type_id),
-        start_time = calc.str_to_time(request_data.starts_at, '%H:%M:%S').time(),
-        end_time = calc.str_to_time(request_data.ends_at, '%H:%M:%S').time(),
+        appointment_type = await AppointmentTypeQuery(db).get(request_data.typeId),
+        start_time = calc.str_to_time(request_data.startsAt, '%H:%M:%S').time(),
+        end_time = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time(),
         me = me
     )
     return JSONResponse(

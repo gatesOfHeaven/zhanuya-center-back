@@ -6,7 +6,6 @@ from datetime import datetime, time, timedelta
 from utils.bases import BaseQuery
 from entities.user import User
 from entities.doctor import Doctor
-from entities.role import RoleID
 from entities.workday import Workday
 from entities.appointment_type import AppointmentType
 from entities.room import Room
@@ -115,6 +114,7 @@ class Query(BaseQuery):
         Validator.validate_duration(slot, appointment_type)
         Validator.validate_workday_time(slot)
         await self.verify_occupation(slot)
+        Validator.validate_isnt_past(slot)
         await self.verify_am_i_free(slot, me)
         
         if commit: await self.commit()
