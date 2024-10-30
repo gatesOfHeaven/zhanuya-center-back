@@ -1,15 +1,17 @@
 from fastapi import APIRouter, status, Path, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import timedelta
 
 from utils import connect_db
 from utils.bases import BaseResponse
-from utils.facades import auth, calc
+from utils.facades import auth, calc, exec
 from entities.user import User
 from entities.doctor import DoctorQuery
 from entities.appointment_type import AppointmentTypeQuery
 from entities.workday import WorkdayQuery
 from entities.slot import SlotQuery, SlotAsPrimary, MakeAppointmentReq, MySlotAsElement
+from .helpers import schedule_appointment_notification, unschedule_appointment_notification
 
 
 router = APIRouter(tags = ['appointments'])
@@ -37,13 +39,14 @@ async def make_appointment(
         doctor = await DoctorQuery(db).get(request_data.doctorId),
         day = calc.str_to_time(request_data.date, '%d.%m.%Y').date()
     )
-    await SlotQuery(db).new(
+    appointment = await SlotQuery(db).new(
         patient = me,
         workday = workday,
         appointment_type = await AppointmentTypeQuery(db).get(request_data.typeId),
         starts_at = calc.str_to_time(request_data.startsAt, '%H:%M:%S').time(),
         ends_at = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time()
     )
+    schedule_appointment_notification(appointment)
     return JSONResponse(
         status_code = status.HTTP_201_CREATED,
         headers = auth.get_auth_headers(me),
@@ -85,6 +88,8 @@ async def edit_appointment(
         end_time = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time(),
         me = me
     )
+    schedule_appointment_notification(appointment)
+    unschedule_appointment_notification(appointment)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
         content = SlotAsPrimary.to_json(appointment)
@@ -100,6 +105,7 @@ async def cancel_appointment(
     slot_query = SlotQuery(db)
     appointment = await slot_query.get(id, me)
     await slot_query.remove(appointment, me)
+    unschedule_appointment_notification(appointment)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
         content = BaseResponse.to_json('Appointment Canceled')

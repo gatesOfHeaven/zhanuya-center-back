@@ -32,5 +32,5 @@ class BaseQuery:
         return (await self.db.execute(query)).scalar_one_or_none()
 
         
-    async def all(self, query: Select[tuple[Entity]]) -> list[Entity]:
+    async def fetch_all(self, query: Select[tuple[Entity]]) -> list[Entity]:
         return (await self.db.execute(query)).scalars().all()

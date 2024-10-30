@@ -20,3 +20,7 @@ def later(
         trigger = DateTrigger(time),
         args = args
     )
+
+
+def remove(id: str):
+    scheduler.remove_job(id)

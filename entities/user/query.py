@@ -95,4 +95,4 @@ class Query(BaseQuery):
         query = select(User).options(
             joinedload(User.role)
         ).order_by(func.random()).limit(count)
-        return await self.all(query)
+        return await self.fetch_all(query)

@@ -4,6 +4,7 @@ from sqlalchemy.orm import joinedload
 from datetime import datetime, time, timedelta
 
 from utils.bases import BaseQuery
+from utils.facades import exec
 from entities.user import User
 from entities.doctor import Doctor
 from entities.workday import Workday
@@ -86,14 +87,14 @@ class Query(BaseQuery):
 
     async def my(self, me: User) -> list[Slot]:
         query = self.select_with_relations.where(Slot.patient_id == me.id)
-        return await self.all(query)
+        return await self.fetch_all(query)
     
 
     async def upcomings(self) -> list[Slot]:
         query = self.select_with_relations.where(
             datetime.combine(Slot.date, Slot.starts_at) - datetime.now() <= timedelta(minutes = 30)
         )
-        return await self.all(query)
+        return await self.fetch_all(query)
         
 
     async def edit(

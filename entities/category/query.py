@@ -8,4 +8,4 @@ from .entity import Category
 class Query(BaseQuery):
     async def all(self) -> list[Category]:
         query = select(Category)
-        return await self.all(query)
+        return await self.fetch_all(query)
