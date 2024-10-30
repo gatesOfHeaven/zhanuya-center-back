@@ -150,7 +150,8 @@ class Query(BaseQuery):
             Slot.date == slot.workday.date,
             Slot.starts_at < slot.ends_at,
             Slot.ends_at > slot.starts_at,
-            Slot.patient_id == me.id
+            Slot.patient_id == me.id,
+            Slot.id != slot.id
         ))
         am_i_busy = await self.field(query)
         if am_i_busy:

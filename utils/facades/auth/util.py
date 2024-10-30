@@ -41,4 +41,7 @@ async def authenticate_me_if_token(
     token: str | None = Header(None, alias = 'Auth'),
     db: AsyncSession = Depends(connect_db)
 ) -> User | None:
-    return await UserQuery(db).get_by_id(authenticate_token(token)) if token else None
+    if token is None: return None
+    try:
+        return await UserQuery(db).get_by_id(authenticate_token(token))
+    except: return None
