@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import date, time
 from typing import Callable
 
@@ -12,6 +13,11 @@ from .entity import Workday
 
 
 class Query(BaseQuery):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db)
+        self.slot_comparator: Callable[[Slot], time] = lambda slot: slot.starts_at
+
+    
     async def get(self, doctor: Doctor, day: date) -> Workday:
         query = select(Workday).where(
             Workday.doctor == doctor,
@@ -27,6 +33,7 @@ class Query(BaseQuery):
                 status.HTTP_404_NOT_FOUND,
                 'This Doctor Does Not Work This Day'
             )
+        workday.slots.sort(key = self.slot_comparator)
         return workday
 
 
@@ -42,7 +49,6 @@ class Query(BaseQuery):
 
         day_comparator: Callable[[Workday], date] = lambda day: day.date
         workdays.sort(key = day_comparator)
-        slot_comparator: Callable[[Slot], time] = lambda slot: slot.starts_at
         for workday in workdays:
-            workday.slots.sort(key = slot_comparator)
+            workday.slots.sort(key = self.slot_comparator)
         return workdays

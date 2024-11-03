@@ -11,6 +11,7 @@ class EducationRecordAsForeign(BaseModel):
     gpa: float
     gpaFrom: int
     
+    @staticmethod
     def to_json(record: EducationRecord):
         return EducationRecordAsForeign(
             id = record.record_id,

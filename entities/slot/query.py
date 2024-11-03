@@ -1,21 +1,21 @@
 from fastapi import status, HTTPException
 from sqlalchemy import select, exists, func
 from sqlalchemy.orm import joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, time, timedelta
 
 from utils.bases import BaseQuery
-from utils.facades import exec
 from entities.user import User
 from entities.doctor import Doctor
 from entities.workday import Workday
-from entities.appointment_type import AppointmentType
+from entities.price import Price
 from entities.room import Room
 from .entity import Slot
 from .validator import Validator
 
 
 class Query(BaseQuery):
-    def __init__(self, db):
+    def __init__(self, db: AsyncSession):
         super().__init__(db)
         self.select_with_relations = select(Slot).options(
             (joinedload(Slot.workday)
@@ -30,6 +30,11 @@ class Query(BaseQuery):
                 .joinedload(Workday.doctor)
                 .joinedload(Doctor.office)
                 .joinedload(Room.building)
+            ),
+            (joinedload(Slot.workday)
+                .joinedload(Workday.doctor)
+                .joinedload(Doctor.price_list)
+                .joinedload(Price.appointment_type)
             ),
             joinedload(Slot.patient),
             joinedload(Slot.type)
@@ -52,7 +57,7 @@ class Query(BaseQuery):
         self,
         patient: User,
         workday: Workday,
-        appointment_type: AppointmentType,
+        price: Price,
         starts_at: time,
         ends_at: time,
         commit: bool = True
@@ -66,11 +71,12 @@ class Query(BaseQuery):
         slot = Slot(
             patient = patient,
             workday = workday,
-            type = appointment_type,
+            type = price.appointment_type,
             starts_at = starts_at,
-            ends_at = ends_at
+            ends_at = ends_at,
+            price = price.cost
         )
-        Validator.validate_duration(slot, appointment_type)
+        Validator.validate_duration(slot, price.appointment_type)
         Validator.validate_workday_time(slot)
         await self.verify_occupation(slot)
         Validator.validate_isnt_past(slot)
@@ -101,7 +107,7 @@ class Query(BaseQuery):
         self,
         slot: Slot,
         workday: Workday,
-        appointment_type: AppointmentType,
+        price: Price,
         start_time: time,
         end_time: time,
         me: User,
@@ -109,10 +115,12 @@ class Query(BaseQuery):
     ) -> Slot:
         Validator.validate_doesnt_start(slot, 'Edit')
         slot.workday = workday
-        slot.type = appointment_type
+        slot.type = price.appointment_type
         slot.starts_at = start_time
         slot.ends_at = end_time
-        Validator.validate_duration(slot, appointment_type)
+        slot.price = price.cost
+
+        Validator.validate_duration(slot, price.appointment_type)
         Validator.validate_workday_time(slot)
         await self.verify_occupation(slot)
         Validator.validate_isnt_past(slot)

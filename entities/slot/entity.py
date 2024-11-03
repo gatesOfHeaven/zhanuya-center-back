@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, Date, Time, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, Mapped
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from utils.bases import BaseEntity
@@ -21,6 +22,7 @@ class Slot(BaseEntity):
     type_id = Column(Integer, ForeignKey('appointment_types.id'), nullable = False)
     starts_at = Column(Time, nullable = False)
     ends_at = Column(Time, nullable = False)
+    price = Column(Integer, nullable = False)
 
     __table_args__: tuple[ForeignKeyConstraint] = tuple([
         ForeignKeyConstraint(
@@ -32,3 +34,13 @@ class Slot(BaseEntity):
     patient: Mapped['User'] = relationship()
     type: Mapped['AppointmentType'] = relationship()
     workday: Mapped['Workday'] = relationship(back_populates = 'slots')
+
+
+    def start_datetime(self) -> datetime:
+        return datetime.combine(self.date, self.starts_at)
+
+    def end_datetime(self) -> datetime:
+        return datetime.combine(self.date, self.ends_at)
+    
+    def duration(self) -> timedelta:
+        return self.end_datetime() - self.start_datetime()

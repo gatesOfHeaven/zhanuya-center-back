@@ -9,6 +9,7 @@ class AppointmentTypeAsPrimary(BaseModel):
     minDurationInMinutes: int
     maxDurationInMinutes: int
 
+    @staticmethod
     def to_json(type: AppointmentType):
         return AppointmentTypeAsPrimary(
             id = type.id,
@@ -22,6 +23,7 @@ class AppointmentTypeAsForeign(BaseModel):
     id: int
     name: str
 
+    @staticmethod
     def to_json(type: AppointmentType):
         return AppointmentTypeAsForeign(
             id = type.id,

@@ -27,5 +27,6 @@ class SignUpReq(BaseModel):
 class SignUpRes(BaseModel):
     id: int
 
+    @staticmethod
     def to_json(user: User):
         return SignUpRes(id = user.id).model_dump()

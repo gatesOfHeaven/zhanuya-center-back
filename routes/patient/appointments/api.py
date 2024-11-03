@@ -9,6 +9,7 @@ from utils.facades import auth, calc, exec
 from entities.user import User
 from entities.doctor import DoctorQuery
 from entities.appointment_type import AppointmentTypeQuery
+from entities.price import PriceQuery
 from entities.workday import WorkdayQuery
 from entities.slot import SlotQuery, SlotAsPrimary, MakeAppointmentReq, MySlotAsElement
 from .helpers import schedule_appointment_notification, unschedule_appointment_notification
@@ -35,14 +36,19 @@ async def make_appointment(
     me: User | None = Depends(auth.authenticate_me),
     db: AsyncSession = Depends(connect_db)
 ):
+    doctor = await DoctorQuery(db).get(request_data.doctorId)
     workday = await WorkdayQuery(db).get(
-        doctor = await DoctorQuery(db).get(request_data.doctorId),
+        doctor = doctor,
         day = calc.str_to_time(request_data.date, '%d.%m.%Y').date()
+    )
+    price = await PriceQuery(db).new(
+        doctor = doctor,
+        appointment_type = await AppointmentTypeQuery(db).get(request_data.typeId)
     )
     appointment = await SlotQuery(db).new(
         patient = me,
         workday = workday,
-        appointment_type = await AppointmentTypeQuery(db).get(request_data.typeId),
+        price = price,
         starts_at = calc.str_to_time(request_data.startsAt, '%H:%M:%S').time(),
         ends_at = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time()
     )
@@ -76,14 +82,19 @@ async def edit_appointment(
 ):
     slot_query = SlotQuery(db)
     appointment = await slot_query.get(id, me)
+    doctor = await DoctorQuery(db).get(request_data.doctorId)
     workday = await WorkdayQuery(db).get(
-        doctor = await DoctorQuery(db).get(request_data.doctorId),
+        doctor = doctor,
         day = calc.str_to_time(request_data.date, '%d.%m.%Y').date()
+    )
+    price = await PriceQuery(db).new(
+        doctor = doctor,
+        appointment_type = await AppointmentTypeQuery(db).get(request_data.typeId)
     )
     appointment = await slot_query.edit(
         slot = appointment,
         workday = workday,
-        appointment_type = await AppointmentTypeQuery(db).get(request_data.typeId),
+        price = price,
         start_time = calc.str_to_time(request_data.startsAt, '%H:%M:%S').time(),
         end_time = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time(),
         me = me

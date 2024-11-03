@@ -30,12 +30,12 @@ async def seed(db: AsyncSession):
     rooms = await RoomFactory(db).seed(25, buildings)
     doctors = await DoctorFactory(db).seed(users, categories, rooms)
     appointment_types = await AppointmentTypeFactory(db).seed()
-    await PriceFactory(db).seed(doctors, appointment_types)
+    prices = await PriceFactory(db).seed(doctors, appointment_types)
     await EducationRecordFactory(db).seed(doctors, users)
     await ExperienceRecordFactory(db).seed(doctors, users, categories)
     workdays = await WorkdayFactory(db).seed(worktimes, doctors)
     await LunchFactory(db).seed(workdays)
-    await SlotFactory(db).seed(workdays, users, appointment_types)
+    await SlotFactory(db).seed(workdays, users, prices)
 
 
 async def main():

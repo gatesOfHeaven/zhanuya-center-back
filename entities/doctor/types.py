@@ -22,6 +22,7 @@ class DoctorAsPrimary(BaseModel):
     experience: list[ExperienceRecordAsForeign]
     education: list[EducationRecordAsForeign]
 
+    @staticmethod
     def to_json(doctor: Doctor):
         return DoctorAsPrimary(
             id = doctor.id,
@@ -53,6 +54,7 @@ class DoctorAsForeign(BaseModel):
     surname: str
     avatarUrl: str
 
+    @staticmethod
     def to_json(doctor: Doctor):
         return DoctorAsForeign(
             id = doctor.id,

@@ -13,6 +13,7 @@ class DoctorsAsResource(BaseModel):
     name: str
     surname: str
 
+    @staticmethod
     def to_json(doctor: User):
         return DoctorsAsResource(
             id = doctor.id,
@@ -27,6 +28,7 @@ class ResourcesRes(BaseModel):
     offices: list[BuildingAsForeign]
     appointment_types: list[AppointmentTypeAsPrimary]
 
+    @staticmethod
     def to_json(
         doctors: list[Doctor],
         categories: list[Category],

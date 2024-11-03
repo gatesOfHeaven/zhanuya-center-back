@@ -1,5 +1,5 @@
 from random import randint
-from datetime import datetime, date, time, timedelta
+from datetime import time, timedelta
 
 from utils.bases import BaseFactory
 from entities.workday import Workday
@@ -11,8 +11,8 @@ class Factory(BaseFactory):
         fakes: list[Lunch] = []
 
         for workday in workdays:
-            workday_starts_at = datetime.combine(date.today(), workday.starts_at)
-            workday_ends_at = datetime.combine(date.today(), workday.ends_at)
+            workday_starts_at = workday.start_datetime()
+            workday_ends_at = workday.end_datetime()
             if workday_ends_at - workday_starts_at <= timedelta(hours = 4):
                 workday.lunch = None
                 continue

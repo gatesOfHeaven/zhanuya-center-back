@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select, func, or_, and_
 from sqlalchemy.orm import joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.bases import BaseQuery
 from entities.user import User
@@ -12,15 +13,19 @@ from .entity import Doctor
 
 
 class Query(BaseQuery):
-    async def get(self, id: int) -> Doctor:
-        query = select(Doctor).options(
+    def __init__(self, db: AsyncSession):
+        super().__init__(db)
+        self.select_with_relations = select(Doctor).options(
             joinedload(Doctor.profile),
             joinedload(Doctor.category),
             joinedload(Doctor.price_list).joinedload(Price.appointment_type),
             joinedload(Doctor.office).joinedload(Room.building),
             joinedload(Doctor.experience),
             joinedload(Doctor.education)
-        ).where(Doctor.id == id)
+        )
+    
+    async def get(self, id: int) -> Doctor:
+        query = self.select_with_relations.where(Doctor.id == id)
         doctor = (await self.db.execute(query)).unique().scalar_one_or_none()
         if doctor is None:
             raise HTTPException(
@@ -47,7 +52,8 @@ class Query(BaseQuery):
         query = select(Doctor).options(
             joinedload(Doctor.profile),
             joinedload(Doctor.category),
-            joinedload(Doctor.office).joinedload(Room.building)
+            joinedload(Doctor.office).joinedload(Room.building),
+            joinedload(Doctor.price_list).joinedload(Price.appointment_type)
         ).join(User).join(Category).join(Room).join(Building)
 
         if fullname is not None:
@@ -89,12 +95,5 @@ class Query(BaseQuery):
     
     
     async def get_random(self, count: int) -> list[Doctor]:
-        query = select(Doctor).options(
-            joinedload(Doctor.profile),
-            joinedload(Doctor.category),
-            joinedload(Doctor.price_list).joinedload(Price.appointment_type),
-            joinedload(Doctor.office).joinedload(Room.building),
-            joinedload(Doctor.experience),
-            joinedload(Doctor.education)
-        ).order_by(func.random()).limit(count)
+        query = self.select_with_relations.order_by(func.random()).limit(count)
         return (await self.db.execute(query)).unique().scalars().all()

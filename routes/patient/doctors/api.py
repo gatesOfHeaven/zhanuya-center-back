@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Path, Query, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime, timedelta
 
 from utils import connect_db
-from utils.facades import auth
+from utils.facades import auth, calc
 from entities.user import User
 from entities.doctor import DoctorQuery, DoctorAsPrimary
 from entities.worktime import WorktimeQuery
 from entities.workday import WorkdayQuery, CURR_WEEK_NUM
-from .types import DoctorAsElement, ScheduleRes
+from .types import DoctorAsElement, ScheduleRes, FreeSlotAsElement, FreeSlotsRes
 
 
 router = APIRouter(tags = ['doctors'])
@@ -68,3 +69,42 @@ async def doctor_schedule(
             me = me
         )
     )
+
+
+@router.get('/{id}/day/{date}', response_model = FreeSlotsRes)
+async def free_slots(
+    id: int = Path(gt = 0),
+    date: str = Path(pattern = r'\d{2}\.\d{2}\.\d{4}'),
+    per_hour: int = Query(gt = 0, le = 60, default = 2),
+    db: AsyncSession = Depends(connect_db)    
+):
+    workday = await WorkdayQuery(db).get(
+        doctor = await DoctorQuery(db).get(id),
+        day = calc.str_to_time(date, '%d.%m.%Y').date()
+    )
+    next_slots = workday.slots.copy()
+    free_slots: list[FreeSlotAsElement] = []
+    current_timepoint: datetime = workday.start_datetime()
+    increment_interval = timedelta(minutes = 60 / per_hour)
+
+    while current_timepoint < workday.end_datetime():
+        lunch = workday.lunch
+        is_free = True
+        next_timepoint = current_timepoint + increment_interval
+
+        if lunch is None or not lunch.start_datetime() <= current_timepoint < lunch.end_datetime():
+            while len(next_slots) > 0 and next_slots[0].start_datetime() <= current_timepoint:
+                is_free = False
+                past_slot = next_slots.pop(0)
+                print(past_slot.start_datetime())
+
+            if is_free: free_slots.append(FreeSlotAsElement(
+                startTime = calc.time_to_str(current_timepoint, '%H:%M:%S'),
+                endTime = calc.time_to_str(next_timepoint, '%H:%M:%S')
+            ))
+        current_timepoint = next_timepoint
+
+    return JSONResponse(FreeSlotsRes.to_json(
+        freeSlots = free_slots,
+        workday = workday
+    ))

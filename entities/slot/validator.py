@@ -18,11 +18,9 @@ class Validator:
 
     @staticmethod
     def validate_duration(slot: Slot, appointment_type: AppointmentType):
-        start_datetime = datetime.combine(slot.workday.date, slot.starts_at)
-        end_datetime = datetime.combine(slot.workday.date, slot.ends_at)
         min_duration = timedelta(minutes = appointment_type.min_duration_mins)
         max_duration = timedelta(minutes = appointment_type.max_duration_mins)
-        if not min_duration <= end_datetime - start_datetime <= max_duration:
+        if not min_duration <= slot.duration() <= max_duration:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 'Invalid Appointment Duration'
@@ -51,7 +49,7 @@ class Validator:
 
     @staticmethod
     def validate_isnt_past(slot: Slot):
-        if datetime.combine(slot.workday.date, slot.ends_at) < datetime.now():
+        if slot.end_datetime() < datetime.now():
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
                 'You Cannot Make Appointment for Past'
@@ -60,7 +58,7 @@ class Validator:
 
     @staticmethod
     def validate_doesnt_start(slot: Slot, action: str):
-        if datetime.combine(slot.workday.date, slot.starts_at) < datetime.now():
+        if slot.start_datetime() < datetime.now():
             raise HTTPException(
                 status.HTTP_408_REQUEST_TIMEOUT,
                 f'You Cannot {action} Your Appointment More'

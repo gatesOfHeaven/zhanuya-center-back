@@ -15,6 +15,7 @@ class WorkdayAsPrimary(BaseModel):
     lunch: LunchAsForeign | None
     slots: list[SlotAsForeign]
 
+    @staticmethod
     def to_json(workday: Workday, me: User | None):
         time_format = '%H:%M:%S'
         return WorkdayAsPrimary(

@@ -9,6 +9,7 @@ class RoomAsPrimary(BaseModel):
     address: str
     title: str
 
+    @staticmethod
     def to_json(room: Room):
         return RoomAsPrimary(
             id = room.id,

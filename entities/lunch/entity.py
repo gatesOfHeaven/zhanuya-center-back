@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, Date, Time, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, Mapped
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from utils.bases import BaseEntity
@@ -24,3 +25,10 @@ class Lunch(BaseEntity):
     ])
 
     workday: Mapped['Workday'] = relationship(back_populates = 'lunch')
+
+
+    def start_datetime(self) -> datetime:
+        return datetime.combine(self.date, self.starts_at)
+
+    def end_datetime(self) -> datetime:
+        return datetime.combine(self.date, self.ends_at)

@@ -8,6 +8,7 @@ class LunchAsForeign(BaseModel):
     startTime: str
     endTime: str
 
+    @staticmethod
     def to_json(lunch: Lunch):
         time_format = '%H:%M:%S'
         return LunchAsForeign(

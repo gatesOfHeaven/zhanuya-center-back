@@ -5,8 +5,10 @@ from entities.user import User
 from entities.doctor import Doctor, DoctorAsPrimary
 from entities.category import CategoryAsForeign
 from entities.room import RoomAsPrimary
+from entities.price import PriceAsPrimary
 from entities.worktime import Worktime, WorktimeAsForeign
 from entities.workday import Workday, WorkdayAsPrimary
+from entities.slot import SlotAsForeign
 
 
 class DoctorAsElement(BaseModel):
@@ -15,17 +17,21 @@ class DoctorAsElement(BaseModel):
     surname: str
     avatarUrl: str
     age: int
+    visitPrice: int
     expInMonthes: int
     category: CategoryAsForeign
     office: RoomAsPrimary
 
+    @staticmethod
     def to_json(doctor: Doctor):
+        visitPrice = next((price.cost for price in doctor.price_list if price.type_id == 1), None)
         return DoctorAsElement(
             id = doctor.id,
             name = doctor.profile.name,
             surname = doctor.profile.surname,
             avatarUrl = doctor.avatar_url,
             age = calc.get_age(doctor.profile.birth_date),
+            visitPrice = visitPrice,
             expInMonthes = calc.get_monthes(doctor.career_started_on),
             category = CategoryAsForeign.to_json(doctor.category),
             office = RoomAsPrimary.to_json(doctor.office)
@@ -37,6 +43,7 @@ class DoctorAsPage(BaseModel):
     worktime: WorktimeAsForeign
     schedule: list[WorkdayAsPrimary]
 
+    @staticmethod
     def to_json(
         doctor: Doctor,
         worktime: Worktime,
@@ -57,6 +64,7 @@ class ScheduleRes(BaseModel):
     worktime: WorktimeAsForeign
     schedule: list[WorkdayAsPrimary]
 
+    @staticmethod
     def to_json(
         worktime: Worktime,
         schedule: list[Workday],
@@ -68,4 +76,23 @@ class ScheduleRes(BaseModel):
                 WorkdayAsPrimary.to_json(workday, me)
                 for workday in schedule
             ]
+        ).model_dump()
+    
+
+class FreeSlotAsElement(BaseModel):
+    startTime: str
+    endTime: str
+
+
+class FreeSlotsRes(BaseModel):
+    freeSlots: list[FreeSlotAsElement]
+    slots: list[SlotAsForeign]
+    priceList: list[PriceAsPrimary]
+
+    @staticmethod
+    def to_json(freeSlots: list[FreeSlotAsElement], workday: Workday):
+        return FreeSlotsRes(
+            freeSlots = freeSlots,
+            slots = [SlotAsForeign.to_json(slot) for slot in workday.slots],
+            priceList = [PriceAsPrimary.to_json(price) for price in workday.doctor.price_list]
         ).model_dump()

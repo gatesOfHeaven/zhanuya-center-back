@@ -14,7 +14,7 @@ class Price(BaseEntity):
 
     doctor_id = Column(Integer, ForeignKey('doctors.id'), primary_key = True, index = True)
     type_id = Column(Integer, ForeignKey('appointment_types.id'), primary_key = True)
-    half_hour_price = Column(Integer, nullable = False)
+    cost = Column(Integer, nullable = False)
 
     appointment_type: Mapped['AppointmentType'] = relationship()
     doctor: Mapped['Doctor'] = relationship(back_populates = 'price_list')

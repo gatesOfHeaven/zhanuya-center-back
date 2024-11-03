@@ -7,6 +7,7 @@ class CategoryAsForeign(BaseModel):
     id: int
     title: str
 
+    @staticmethod
     def to_json(category: Category):
         return CategoryAsForeign(
             id = category.id,

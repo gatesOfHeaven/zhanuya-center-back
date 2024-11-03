@@ -16,6 +16,7 @@ class UserAsPrimary(BaseModel):
     iin: str
     role: str
 
+    @staticmethod
     def to_json(user: User):
         birth_date: date = user.birth_date
         return UserAsPrimary(
@@ -36,6 +37,7 @@ class PatientAsForeign(BaseModel):
     name: str
     surname: str
 
+    @staticmethod
     def to_json(user: User):
         return PatientAsForeign(
             id = user.id,

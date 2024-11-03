@@ -15,7 +15,7 @@ class Factory(BaseFactory):
                 fakes.append(Price(
                     doctor = doctor,
                     appointment_type = type,
-                    half_hour_price = base_price * (index + 1)
+                    cost = base_price * (index + 1)
                 ))        
         await self.flush(fakes)
         return fakes

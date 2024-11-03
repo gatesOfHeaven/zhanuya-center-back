@@ -4,7 +4,6 @@ from datetime import datetime
 from utils.facades import calc
 from entities.user import User, PatientAsForeign
 from entities.doctor import DoctorAsForeign
-from entities.role import RoleID
 from entities.category import CategoryAsForeign
 from entities.room import RoomAsPrimary
 from entities.appointment_type import AppointmentTypeAsForeign
@@ -25,6 +24,7 @@ class SlotAsPrimary(BaseModel):
     index: int
     startTime: str
     endTime: str
+    price: int
     isFinished: bool
     type: AppointmentTypeAsForeign
     category: CategoryAsForeign
@@ -32,6 +32,7 @@ class SlotAsPrimary(BaseModel):
     doctor: DoctorAsForeign
     patient: PatientAsForeign
 
+    @staticmethod
     def to_json(slot: Slot):
         return SlotAsPrimary(
             id = slot.id,
@@ -39,7 +40,8 @@ class SlotAsPrimary(BaseModel):
             index = slot.index,
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),
-            isFinished = datetime.now() > datetime.combine(slot.date, slot.ends_at),
+            price = slot.price,
+            isFinished = datetime.now() > slot.end_datetime(),
             type = AppointmentTypeAsForeign.to_json(slot.type),
             category = CategoryAsForeign.to_json(slot.workday.doctor.category),
             room = RoomAsPrimary.to_json(slot.workday.doctor.office),
@@ -54,7 +56,8 @@ class SlotAsForeign(BaseModel):
     endTime: str
     mine: bool
 
-    def to_json(slot: Slot, me: User | None):
+    @staticmethod
+    def to_json(slot: Slot, me: User | None = None):
         return SlotAsForeign(
             id = slot.id,
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
@@ -69,12 +72,14 @@ class MySlotAsElement(BaseModel):
     date: str
     startTime: str
     endTime: str
+    price: int
     isFinished: bool
     type: AppointmentTypeAsForeign
     category: CategoryAsForeign
     room: RoomAsPrimary
     doctor: DoctorAsForeign
 
+    @staticmethod
     def to_json(slot: Slot):
         return MySlotAsElement(
             id = slot.id,
@@ -82,7 +87,8 @@ class MySlotAsElement(BaseModel):
             date = calc.time_to_str(slot.workday.date),
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),
-            isFinished = datetime.now() > datetime.combine(slot.date, slot.ends_at),
+            price = slot.price,
+            isFinished = datetime.now() > slot.end_datetime(),
             type = AppointmentTypeAsForeign.to_json(slot.type),
             category = CategoryAsForeign.to_json(slot.workday.doctor.category),
             room = RoomAsPrimary.to_json(slot.workday.doctor.office),

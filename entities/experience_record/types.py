@@ -12,6 +12,7 @@ class ExperienceRecordAsForeign(BaseModel):
     position: str
     hoursAtDay: int
     
+    @staticmethod
     def to_json(record: ExperienceRecord):
         return ExperienceRecordAsForeign(
             id = record.record_id,
