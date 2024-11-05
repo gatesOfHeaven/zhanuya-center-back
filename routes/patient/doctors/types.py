@@ -8,7 +8,6 @@ from entities.room import RoomAsPrimary
 from entities.price import PriceAsPrimary
 from entities.worktime import Worktime, WorktimeAsForeign
 from entities.workday import Workday, WorkdayAsPrimary
-from entities.slot import SlotAsForeign
 
 
 class DoctorAsElement(BaseModel):
@@ -86,13 +85,11 @@ class FreeSlotAsElement(BaseModel):
 
 class FreeSlotsRes(BaseModel):
     freeSlots: list[FreeSlotAsElement]
-    slots: list[SlotAsForeign]
     priceList: list[PriceAsPrimary]
 
     @staticmethod
     def to_json(freeSlots: list[FreeSlotAsElement], workday: Workday):
         return FreeSlotsRes(
             freeSlots = freeSlots,
-            slots = [SlotAsForeign.to_json(slot) for slot in workday.slots],
             priceList = [PriceAsPrimary.to_json(price) for price in workday.doctor.price_list]
         ).model_dump()

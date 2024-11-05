@@ -75,34 +75,36 @@ async def doctor_schedule(
 async def free_slots(
     id: int = Path(gt = 0),
     date: str = Path(pattern = r'\d{2}\.\d{2}\.\d{4}'),
-    per_hour: int = Query(gt = 0, le = 60, default = 2),
+    except_slot_id: int = Query(ge = 0, default = 0),
+    duration: int = Query(gt = 0, default = 30),
+    min_interval: int = Query(gt = 0, le = 60, default = 30),
     db: AsyncSession = Depends(connect_db)    
 ):
     workday = await WorkdayQuery(db).get(
         doctor = await DoctorQuery(db).get(id),
         day = calc.str_to_time(date, '%d.%m.%Y').date()
     )
-    next_slots = workday.slots.copy()
+    next_slots = [slot for slot in workday.slots if slot.id != except_slot_id]
     free_slots: list[FreeSlotAsElement] = []
     current_timepoint: datetime = workday.start_datetime()
-    increment_interval = timedelta(minutes = 60 / per_hour)
+    end_timepoint = current_timepoint + timedelta(minutes = duration)
 
-    while current_timepoint < workday.end_datetime():
-        lunch = workday.lunch
+    while end_timepoint <= workday.end_datetime():
         is_free = True
-        next_timepoint = current_timepoint + increment_interval
+        lunch = workday.lunch
+        next_timepoint = current_timepoint + timedelta(minutes = min_interval)
 
         if lunch is None or not lunch.start_datetime() <= current_timepoint < lunch.end_datetime():
-            while len(next_slots) > 0 and next_slots[0].start_datetime() <= current_timepoint:
+            while len(next_slots) > 0 and next_slots[0].start_datetime() < end_timepoint:
                 is_free = False
-                past_slot = next_slots.pop(0)
-                print(past_slot.start_datetime())
+                next_timepoint = next_slots.pop(0).end_datetime()
 
             if is_free: free_slots.append(FreeSlotAsElement(
                 startTime = calc.time_to_str(current_timepoint, '%H:%M:%S'),
-                endTime = calc.time_to_str(next_timepoint, '%H:%M:%S')
+                endTime = calc.time_to_str(end_timepoint, '%H:%M:%S')
             ))
         current_timepoint = next_timepoint
+        end_timepoint = current_timepoint + timedelta(minutes = duration)
 
     return JSONResponse(FreeSlotsRes.to_json(
         freeSlots = free_slots,
