@@ -2,6 +2,7 @@ from pytest import mark
 from httpx import AsyncClient
 from fastapi import status
 
+from routes.patient.resources import ResourcesRes
 from tests.utils.app import anyio_backend, client
 
 
@@ -29,10 +30,10 @@ async def test_get_resources(
         'offices': offices
     })
 
-    response_data: dict[str, list] = response.json()
-    doctors_arr: list = response_data['doctors']
-    categories_arr: list = response_data['categories']
-    offices_arr: list = response_data['offices']
+    response_data = ResourcesRes(**response.json())
+    doctors_arr = response_data.doctors
+    categories_arr = response_data.categories
+    offices_arr = response_data.offices
 
     assert response.status_code == status.HTTP_200_OK
     if not doctors: assert len(doctors_arr) == 0

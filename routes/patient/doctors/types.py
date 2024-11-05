@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import timedelta
 
 from utils.facades import calc
 from entities.user import User
@@ -81,6 +82,10 @@ class ScheduleRes(BaseModel):
 class FreeSlotAsElement(BaseModel):
     startTime: str
     endTime: str
+
+    def duration(self) -> timedelta:
+        format = '%H:%M:%S'
+        return calc.str_to_time(self.endTime, format) - calc.str_to_time(self.startTime, format)
 
 
 class FreeSlotsRes(BaseModel):

@@ -84,17 +84,22 @@ async def free_slots(
         doctor = await DoctorQuery(db).get(id),
         day = calc.str_to_time(date, '%d.%m.%Y').date()
     )
+    lunch = workday.lunch
     next_slots = [slot for slot in workday.slots if slot.id != except_slot_id]
     free_slots: list[FreeSlotAsElement] = []
-    current_timepoint: datetime = workday.start_datetime()
+    current_timepoint = workday.start_datetime()
     end_timepoint = current_timepoint + timedelta(minutes = duration)
 
     while end_timepoint <= workday.end_datetime():
+        print(current_timepoint, end_timepoint)
         is_free = True
-        lunch = workday.lunch
         next_timepoint = current_timepoint + timedelta(minutes = min_interval)
 
-        if lunch is None or not lunch.start_datetime() <= current_timepoint < lunch.end_datetime():
+        if lunch is not None and (
+            lunch.start_datetime() < end_timepoint <= lunch.end_datetime() or
+            lunch.start_datetime() <= current_timepoint < lunch.end_datetime()
+        ): next_timepoint = lunch.end_datetime()
+        else:
             while len(next_slots) > 0 and next_slots[0].start_datetime() < end_timepoint:
                 is_free = False
                 next_timepoint = next_slots.pop(0).end_datetime()

@@ -89,10 +89,3 @@ class Query(BaseQuery):
             joinedload(User.role)
         )
         return await self.first(query)
-    
-
-    async def get_random(self, count: int) -> list[User]:
-        query = select(User).options(
-            joinedload(User.role)
-        ).order_by(func.random()).limit(count)
-        return await self.fetch_all(query)

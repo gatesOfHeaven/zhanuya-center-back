@@ -1,8 +1,11 @@
+from sqlalchemy import select, func
+from sqlalchemy.orm import joinedload
 from random import randint, choice
 from datetime import date, timedelta
 
 from utils.bases import BaseFactory
 from utils.facades import hash, calc
+from utils.facades import auth
 from entities.role import RoleID
 from .entity import User
 
@@ -39,6 +42,42 @@ class Factory(BaseFactory):
             
         await self.flush(fakes)
         return fakes
+    
+
+    async def new(self) -> tuple[User, str]:
+        email = 'test@test.qa'
+        query = select(User).where(User.email == email)
+        user = await self.first(query)
+        if user is None:
+            [name, surname, *_] = self.fake.name().split(' ')
+            birth_date = self.get_birth_date(RoleID.PATIENT)
+            password = self.fake.password()
+            user = User(
+                email = email,
+                role_id = RoleID.PATIENT.value,
+                iin = iin_from(birth_date, randint(1, 10**6 - 1)),
+                name = name,
+                surname = surname,
+                gender = choice(['male', 'female']),
+                birth_date = birth_date,
+                password = password, # test only
+                password_hash = hash.it(password)
+            )
+            self.db.add(user)
+            await self.commit()
+        return (user, auth.generate_token(user.id))
+    
+
+    async def get_random(self, count: int) -> list[User]:
+        query = select(User).options(
+            joinedload(User.role)
+        ).order_by(func.random()).limit(count)
+        return await self.fetch_all(query)
+    
+    
+    async def remove(self, user: User):
+        await self.db.delete(user)
+        await self.commit()
 
 
     def get_role(self, patient_probability: int, doctor_probability: int) -> RoleID:

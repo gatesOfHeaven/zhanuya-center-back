@@ -1,3 +1,5 @@
+from sqlalchemy import select, func
+from sqlalchemy.orm import joinedload
 from random import choice
 from datetime import date, timedelta
 
@@ -6,6 +8,7 @@ from entities.user import User
 from entities.category import Category
 from entities.room import Room
 from entities.role import RoleID
+from entities.price import Price
 from .entity import Doctor
 
 
@@ -42,3 +45,15 @@ class Factory(BaseFactory):
         
         await self.flush(fakes)
         return fakes
+    
+    
+    async def get_random(self, count: int) -> list[Doctor]:
+        query = select(Doctor).options(
+            joinedload(Doctor.profile),
+            joinedload(Doctor.category),
+            joinedload(Doctor.price_list).joinedload(Price.appointment_type),
+            joinedload(Doctor.office).joinedload(Room.building),
+            joinedload(Doctor.experience),
+            joinedload(Doctor.education)
+        ).order_by(func.random()).limit(count)
+        return (await self.db.execute(query)).unique().scalars().all()

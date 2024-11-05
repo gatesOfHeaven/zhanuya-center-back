@@ -12,20 +12,16 @@ from entities.room import Room
 from .entity import Doctor
 
 
-class Query(BaseQuery):
-    def __init__(self, db: AsyncSession):
-        super().__init__(db)
-        self.select_with_relations = select(Doctor).options(
+class Query(BaseQuery):    
+    async def get(self, id: int) -> Doctor:
+        query = select(Doctor).options(
             joinedload(Doctor.profile),
             joinedload(Doctor.category),
             joinedload(Doctor.price_list).joinedload(Price.appointment_type),
             joinedload(Doctor.office).joinedload(Room.building),
             joinedload(Doctor.experience),
             joinedload(Doctor.education)
-        )
-    
-    async def get(self, id: int) -> Doctor:
-        query = self.select_with_relations.where(Doctor.id == id)
+        ).where(Doctor.id == id)
         doctor = (await self.db.execute(query)).unique().scalar_one_or_none()
         if doctor is None:
             raise HTTPException(
@@ -92,8 +88,3 @@ class Query(BaseQuery):
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f'Invalid sort_by field: {sort_by}')
         return await self.fetch_all(query)
-    
-    
-    async def get_random(self, count: int) -> list[Doctor]:
-        query = self.select_with_relations.order_by(func.random()).limit(count)
-        return (await self.db.execute(query)).unique().scalars().all()
