@@ -94,13 +94,6 @@ class Query(BaseQuery):
     async def my(self, me: User) -> list[Slot]:
         query = self.select_with_relations.where(Slot.patient_id == me.id)
         return await self.fetch_all(query)
-    
-
-    async def upcomings(self) -> list[Slot]:
-        query = self.select_with_relations.where(
-            datetime.combine(Slot.date, Slot.starts_at) - datetime.now() <= timedelta(minutes = 30)
-        )
-        return await self.fetch_all(query)
         
 
     async def edit(

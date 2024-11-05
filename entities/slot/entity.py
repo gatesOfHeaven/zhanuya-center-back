@@ -37,10 +37,12 @@ class Slot(BaseEntity):
 
 
     def start_datetime(self) -> datetime:
-        return datetime.combine(self.date, self.starts_at)
+        day = self.date if self.date else self.workday.date
+        return datetime.combine(day, self.starts_at)
 
     def end_datetime(self) -> datetime:
-        return datetime.combine(self.date, self.ends_at)
+        day = self.date if self.date else self.workday.date
+        return datetime.combine(day, self.ends_at)
     
     def duration(self) -> timedelta:
         return self.end_datetime() - self.start_datetime()
