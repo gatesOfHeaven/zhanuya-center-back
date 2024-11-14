@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Path, Body, Depends
+from fastapi import APIRouter, status, HTTPException, Path, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -49,9 +49,18 @@ async def make_appointment(
         workday = workday,
         price = price,
         starts_at = calc.str_to_time(request_data.startsAt, '%H:%M:%S').time(),
-        ends_at = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time()
+        ends_at = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time(),
+        commit = False
     )
-    # schedule_appointment_notification(appointment)
+    await db.commit()
+    schedule_appointment_notification(appointment)
+
+    # try:
+    #     schedule_appointment_notification(appointment)
+    #     await db.commit()
+    # except:
+    #     await db.rollback()
+    #     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return JSONResponse(
         status_code = status.HTTP_201_CREATED,
         headers = auth.get_auth_headers(me),
@@ -96,10 +105,19 @@ async def edit_appointment(
         price = price,
         start_time = calc.str_to_time(request_data.startsAt, '%H:%M:%S').time(),
         end_time = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time(),
-        me = me
+        me = me,
+        commit = False
     )
-    # schedule_appointment_notification(appointment)
-    # unschedule_appointment_notification(appointment)
+    await db.commit()
+    unschedule_appointment_notification(appointment)
+    schedule_appointment_notification(appointment)
+    # try:
+    #     unschedule_appointment_notification(appointment)
+    #     schedule_appointment_notification(appointment)
+    #     await db.commit()
+    # except:
+    #     await db.rollback()
+    #     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
         content = SlotAsPrimary.to_json(appointment)
@@ -114,8 +132,15 @@ async def cancel_appointment(
 ):
     slot_query = SlotQuery(db)
     appointment = await slot_query.get(id, me)
-    await slot_query.remove(appointment, me)
-    # unschedule_appointment_notification(appointment)
+    await slot_query.remove(appointment, me, commit = False)
+    await db.commit()
+    unschedule_appointment_notification(appointment)
+    # try:
+    #     unschedule_appointment_notification(appointment)
+    #     await db.commit()
+    # except:
+    #     await db.rollback()
+    #     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
         content = BaseResponse.to_json('Appointment Canceled')

@@ -21,8 +21,8 @@ def schedule_appointment_notification(appointment: Slot, minutes: int = 30):
     exec.later(
         id = job_id(appointment),
         job = notify_about_appointment,
-        time = appointment.starts_at - timedelta(minutes = minutes),
-        args = appointment
+        time = appointment.start_datetime() - timedelta(minutes = minutes),
+        args = (appointment,)
     )
 
 

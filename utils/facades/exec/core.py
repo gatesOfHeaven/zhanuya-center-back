@@ -12,7 +12,7 @@ def later(
     id: str,
     job: Callable[[*Args], None],
     time: datetime,
-    *args: *Args
+    args: tuple[*Args]
 ):
     scheduler.add_job(
         id = id,

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from entities.user import User
+from entities.user import User, Gender
 
 
 class SendVerificationReq(BaseModel):
@@ -18,7 +18,7 @@ class SignUpReq(BaseModel):
     surname: str = Field(max_length = 25)
     email: str = Field(pattern = r'[^@]+@[^@]+\.[^@]+')
     iin: str = Field(min_length = 12, max_length = 12, pattern = r'^\d+$')
-    gender: str = Field(min_length = 4, max_length = 6)
+    gender: Gender
     birthDate: str = Field(pattern = r'\d{2}\-\d{2}\-\d{4}')
     emailVerificationCode: int
     password: str =Field(min_length = 8, max_length = 25, pattern = r'^[A-Za-z\d@$!%*?&]+$')
