@@ -7,6 +7,7 @@ from entities.doctor import DoctorAsForeign
 from entities.category import CategoryAsForeign
 from entities.room import RoomAsPrimary
 from entities.appointment_type import AppointmentTypeAsForeign
+from entities.payment import ReceiptAsForeign
 from .entity import Slot
     
 
@@ -25,12 +26,12 @@ class SlotAsPrimary(BaseModel):
     startTime: str
     endTime: str
     price: int
-    isFinished: bool
     type: AppointmentTypeAsForeign
     category: CategoryAsForeign
     room: RoomAsPrimary
     doctor: DoctorAsForeign
     patient: PatientAsForeign
+    receipt: ReceiptAsForeign | None
 
     @staticmethod
     def to_json(slot: Slot):
@@ -41,12 +42,12 @@ class SlotAsPrimary(BaseModel):
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),
             price = slot.price,
-            isFinished = datetime.now() > slot.end_datetime(),
             type = AppointmentTypeAsForeign.to_json(slot.type),
             category = CategoryAsForeign.to_json(slot.workday.doctor.category),
             room = RoomAsPrimary.to_json(slot.workday.doctor.office),
             doctor = DoctorAsForeign.to_json(slot.workday.doctor),
-            patient = PatientAsForeign.to_json(slot.patient)
+            patient = PatientAsForeign.to_json(slot.patient),
+            receipt = ReceiptAsForeign.to_json(slot.payment) if slot.payment else None
         ).model_dump()
 
 
@@ -74,6 +75,7 @@ class MySlotAsElement(BaseModel):
     endTime: str
     price: int
     isFinished: bool
+    isPaid: bool
     type: AppointmentTypeAsForeign
     category: CategoryAsForeign
     room: RoomAsPrimary
@@ -89,6 +91,7 @@ class MySlotAsElement(BaseModel):
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),
             price = slot.price,
             isFinished = datetime.now() > slot.end_datetime(),
+            isPaid = slot.payment is not None,
             type = AppointmentTypeAsForeign.to_json(slot.type),
             category = CategoryAsForeign.to_json(slot.workday.doctor.category),
             room = RoomAsPrimary.to_json(slot.workday.doctor.office),

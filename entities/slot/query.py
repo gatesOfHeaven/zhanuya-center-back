@@ -2,14 +2,17 @@ from fastapi import status, HTTPException
 from sqlalchemy import select, exists, func
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime, time, timedelta
+from datetime import time
 
 from utils.bases import BaseQuery
 from entities.user import User
 from entities.doctor import Doctor
+from entities.manager import Manager
+from entities.terminal import Terminal
 from entities.workday import Workday
 from entities.price import Price
 from entities.room import Room
+from entities.payment import Payment
 from .entity import Slot
 from .validator import Validator
 
@@ -37,11 +40,16 @@ class Query(BaseQuery):
                 .joinedload(Price.appointment_type)
             ),
             joinedload(Slot.patient),
-            joinedload(Slot.type)
+            joinedload(Slot.type),
+            joinedload(Slot.payment).joinedload(Payment.terminal),
+            (joinedload(Slot.payment)
+                .joinedload(Payment.manager)
+                .joinedload(Manager.profile)
+            )
         )
 
 
-    async def get(self, id: int, me: User) -> Slot:
+    async def get(self, id: int, me: User | Terminal) -> Slot:
         query = self.select_with_relations.where(Slot.id == id)
         slot = await self.first(query)
         if slot is None:
@@ -49,7 +57,18 @@ class Query(BaseQuery):
                 status.HTTP_404_NOT_FOUND,
                 'Appointment Not Found'
             )
-        Validator.validate_patient(slot, me, 'See')
+        
+        doctor = slot.workday.doctor
+        building = doctor.office.building
+        im_patient = isinstance(me, User) and slot.patient == me
+        im_doctor = isinstance(me, User) and doctor == me.as_doctor
+        im_manager = isinstance(me, User) and isinstance(me.as_manager, Manager) and building == me.as_manager.building
+        is_terminal = isinstance(me, Terminal) and building == me.building
+        if not (im_patient or im_doctor or im_manager or is_terminal):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                'You Can See Only YOUR Appointments'
+            )
         return slot
 
 

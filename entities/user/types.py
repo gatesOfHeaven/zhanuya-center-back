@@ -23,12 +23,12 @@ class UserAsPrimary(BaseModel):
             id = user.id,
             name = user.name,
             surname = user.surname,
-            gender = user.gender,
+            gender = user.gender.value,
             birthDate = calc.time_to_str(birth_date),
             age = calc.get_age(user.birth_date),
             email = user.email,
             iin = user.iin,
-            role = user.role.name
+            role = user.role_type.value
         ).model_dump()
     
 

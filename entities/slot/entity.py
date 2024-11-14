@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, Date, Time, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, Mapped
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from utils.bases import BaseEntity
 
@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from entities.user import User
     from entities.appointment_type import AppointmentType
     from entities.workday import Workday
+    from entities.payment import Payment
+    from entities.medical_record import MedicalRecord
 
 
 class Slot(BaseEntity):
@@ -24,16 +26,16 @@ class Slot(BaseEntity):
     ends_at = Column(Time, nullable = False)
     price = Column(Integer, nullable = False)
 
-    __table_args__: tuple[ForeignKeyConstraint] = tuple([
-        ForeignKeyConstraint(
-            ['doctor_id', 'date'],
-            ['workdays.doctor_id', 'workdays.date']
-        )
-    ])
+    __table_args__ = (ForeignKeyConstraint(
+        ['doctor_id', 'date'],
+        ['workdays.doctor_id', 'workdays.date']
+    ),)
 
-    patient: Mapped['User'] = relationship()
     type: Mapped['AppointmentType'] = relationship()
+    patient: Mapped['User'] = relationship()
     workday: Mapped['Workday'] = relationship(back_populates = 'slots')
+    payment: Mapped[Optional['Payment']] = relationship(back_populates = 'slot')
+    # records: Mapped[list['MedicalRecord']] = relationship(back_populates = 'slot')
 
 
     def start_datetime(self) -> datetime:

@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from utils.bases import BaseEntity
 
 if TYPE_CHECKING:
-    from entities.user import User
     from entities.doctor import Doctor
+    from entities.manager import Manager
 
 
 class ExperienceRecord(BaseEntity):
@@ -19,7 +19,7 @@ class ExperienceRecord(BaseEntity):
     end_date = Column(Date, nullable=False)
     position = Column(String(50), nullable = False)
     hours_at_day = Column(Integer, default = 8, nullable=False)
-    approved_by = Column(Integer, ForeignKey('users.id'), nullable = True)
+    approved_by = Column(Integer, ForeignKey('managers.id'), nullable = True)
 
     doctor: Mapped['Doctor'] = relationship(back_populates = 'experience')
-    approved_manager: Mapped['User'] = relationship()
+    approved_manager: Mapped['Manager'] = relationship()

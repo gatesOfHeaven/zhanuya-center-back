@@ -4,10 +4,9 @@ from random import choice
 from datetime import date, timedelta
 
 from utils.bases import BaseFactory
-from entities.user import User
+from entities.user import User, Role
 from entities.category import Category
 from entities.room import Room
-from entities.role import RoleID
 from entities.price import Price
 from .entity import Doctor
 
@@ -33,7 +32,7 @@ class Factory(BaseFactory):
         rooms: list[Room]
     ):
         fakes: list[Doctor] = [Doctor(
-            id = user.id,
+            profile = user,
             category = choice(categories),
             office = choice(rooms),
             avatar_url = choice(avatar_urls),
@@ -41,7 +40,7 @@ class Factory(BaseFactory):
                 start_date = user.birth_date + timedelta(days = 16 * 365),
                 end_date = date.today()
             )
-        ) for user in users if user.role_id == RoleID.DOCTOR.value]
+        ) for user in users if user.role_type == Role.DOCTOR]
         
         await self.flush(fakes)
         return fakes

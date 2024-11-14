@@ -111,4 +111,4 @@ async def test_appointments_crud(
             assert response.status_code == status.HTTP_200_OK
             assert my_appointments == []
 
-    user_query.remove(patient)
+    await user_query.remove(patient)

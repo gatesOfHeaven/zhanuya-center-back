@@ -1,11 +1,10 @@
 from fastapi import APIRouter, status, Path, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import timedelta
 
 from utils import connect_db
 from utils.bases import BaseResponse
-from utils.facades import auth, calc, exec
+from utils.facades import auth, calc
 from entities.user import User
 from entities.doctor import DoctorQuery
 from entities.appointment_type import AppointmentTypeQuery
@@ -41,7 +40,7 @@ async def make_appointment(
         doctor = doctor,
         day = calc.str_to_time(request_data.date, '%d.%m.%Y').date()
     )
-    price = await PriceQuery(db).new(
+    price = await PriceQuery(db).get(
         doctor = doctor,
         appointment_type = await AppointmentTypeQuery(db).get(request_data.typeId)
     )
@@ -87,7 +86,7 @@ async def edit_appointment(
         doctor = doctor,
         day = calc.str_to_time(request_data.date, '%d.%m.%Y').date()
     )
-    price = await PriceQuery(db).new(
+    price = await PriceQuery(db).get(
         doctor = doctor,
         appointment_type = await AppointmentTypeQuery(db).get(request_data.typeId)
     )

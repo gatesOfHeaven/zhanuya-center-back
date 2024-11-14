@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from utils.bases import BaseEntity
 
 if TYPE_CHECKING:
-    from entities.user import User
     from entities.doctor import Doctor
+    from entities.manager import Manager
 
 
 class EducationRecord(BaseEntity):
@@ -20,7 +20,7 @@ class EducationRecord(BaseEntity):
     end_year = Column(Integer, nullable=False)
     gpa = Column(Float, nullable=False)
     gpa_from = Column(Integer, nullable=False)
-    approved_by = Column(Integer, ForeignKey('users.id'), nullable = True)
+    approved_by = Column(Integer, ForeignKey('managers.id'), nullable = True)
 
     doctor: Mapped['Doctor'] = relationship(back_populates = 'education')
-    approved_manager: Mapped['User'] = relationship()
+    approved_manager: Mapped['Manager'] = relationship()

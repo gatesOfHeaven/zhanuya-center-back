@@ -2,10 +2,9 @@ from random import randint, choice
 from datetime import date
 
 from utils.bases import BaseFactory
-from entities.user import User
 from entities.doctor import Doctor
+from entities.manager import Manager
 from entities.category import Category
-from entities.role import RoleID
 from .entity import ExperienceRecord
 
 
@@ -13,12 +12,10 @@ class Factory(BaseFactory):
     async def seed(
         self,
         doctors: list[Doctor],
-        users: list[User],
+        managers: list[Manager],
         categories: list[Category]
     ):
         fakes: list[ExperienceRecord] = []
-        managers = [user for user in users if user.role_id == RoleID.MANAGER.value]
-
         for doctor in doctors:
             today = date.today()
             birth_date: date = doctor.profile.birth_date

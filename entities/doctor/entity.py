@@ -22,9 +22,9 @@ class Doctor(BaseEntity):
     avatar_url = Column(String, nullable = False)   # unique
     career_started_on = Column(Date, nullable = False)
 
-    profile: Mapped['User'] = relationship('User')
-    category: Mapped['Category'] = relationship('Category', back_populates = 'doctors')
-    price_list: Mapped[list['Price']] = relationship('Price', back_populates = 'doctor')
-    office: Mapped['Room'] = relationship('Room', back_populates = 'doctors')
-    experience: Mapped[list['ExperienceRecord']] = relationship('ExperienceRecord', back_populates = 'doctor')
-    education: Mapped[list['EducationRecord']] = relationship('EducationRecord', back_populates = 'doctor')
+    profile: Mapped['User'] = relationship(back_populates = 'as_doctor')
+    category: Mapped['Category'] = relationship(back_populates = 'doctors')
+    price_list: Mapped[list['Price']] = relationship(back_populates = 'doctor')
+    office: Mapped['Room'] = relationship(back_populates = 'doctors')
+    experience: Mapped[list['ExperienceRecord']] = relationship(back_populates = 'doctor')
+    education: Mapped[list['EducationRecord']] = relationship(back_populates = 'doctor')

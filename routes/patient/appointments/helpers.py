@@ -15,7 +15,7 @@ def schedule_appointment_notification(appointment: Slot, minutes: int = 30):
         await mail.send(
             appointment.patient.email,
             'You have an Appointment',
-            f'Your doctor {profile.name} {profile.surname} will be waiting for you at the address {office.building.address}, office {office.id} at {calc.time_to_str(appointment.starts_at, '%H:%M')}'
+            f'Your doctor {profile.name} {profile.surname} will be waiting for you at the address {office.building.address}, office {office.title} at {calc.time_to_str(appointment.starts_at, '%H:%M')}'
         )
         
     exec.later(

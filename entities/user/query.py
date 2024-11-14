@@ -1,11 +1,9 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select, exists, or_, func
+from sqlalchemy import select, exists, or_
 from sqlalchemy.orm import joinedload
 from datetime import date
 
 from utils.bases import BaseQuery
-from utils.facades import calc
-from entities.role import RoleID
 from .entity import User
 
 
@@ -33,7 +31,6 @@ class Query(BaseQuery):
             )
 
         user = User(
-            role_id = RoleID.PATIENT.value,
             email = email,
             iin = iin,
             name = name,
@@ -53,7 +50,7 @@ class Query(BaseQuery):
         query = select(User).where(
             User.email == email,
             User.password_hash == password_hash
-        ).options(joinedload(User.role))
+        )
         user = await self.first(query)
 
         if not user:
@@ -73,7 +70,7 @@ class Query(BaseQuery):
         query = select(User).where(
             User.iin == iin,
             User.password_hash == password_hash
-        ).options(joinedload(User.role))
+        )
         user = await self.first(query)
 
         if not user:
@@ -85,7 +82,8 @@ class Query(BaseQuery):
     
     
     async def get_by_id(self, id: int) -> User | None:
-        query = select(User).where(User.id == id).options(
-            joinedload(User.role)
-        )
+        query = select(User).options(
+            joinedload(User.as_doctor),
+            joinedload(User.as_manager)
+        ).where(User.id == id)
         return await self.first(query)

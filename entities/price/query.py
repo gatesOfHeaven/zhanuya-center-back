@@ -9,7 +9,7 @@ from .entity import Price
 
 
 class Query(BaseQuery):
-    async def new(
+    async def get(
         self,
         doctor: Doctor,
         appointment_type: AppointmentType

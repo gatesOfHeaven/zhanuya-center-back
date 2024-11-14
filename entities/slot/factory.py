@@ -3,11 +3,9 @@ from datetime import time, timedelta
 
 from utils.bases import BaseFactory
 from utils.facades import calc
-from entities.user import User
+from entities.user import User, Role
 from entities.workday import Workday
-from entities.appointment_type import AppointmentType
 from entities.price import Price
-from entities.role import RoleID
 from .entity import Slot
 
 
@@ -25,7 +23,7 @@ class Factory(BaseFactory):
         prices: list[Price]
     ):
         fakes: list[Slot] = []
-        patients = [user for user in users if user.role_id == RoleID.PATIENT.value]
+        patients = [user for user in users if user.role_type == Role.PATIENT]
 
         for workday in workdays:
             price = choice([price for price in prices if price.doctor == workday.doctor])

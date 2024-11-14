@@ -6,8 +6,7 @@ from datetime import date, timedelta
 from utils.bases import BaseFactory
 from utils.facades import hash, calc
 from utils.facades import auth
-from entities.role import RoleID
-from .entity import User
+from .entity import User, Role, Gender
 
 
 def iin_from(date: str, num: int) -> str:
@@ -23,18 +22,18 @@ class Factory(BaseFactory):
         fakes: list[User] = []
 
         for _ in range(count):
-            role = self.get_role(87, 10)
+            role = self.get_role(77, 17)
             birth_date = self.get_birth_date(role)
             password = self.fake.password()
             [name, surname, *_] = self.fake.name().split(' ')
 
             fakes.append(User(
                 email = self.fake.email(),
-                role_id = role.value,
+                role_type = role,
                 iin = iin_from(birth_date, randint(1, 10**6 - 1)),
                 name = name,
                 surname = surname,
-                gender = choice(['male', 'female']),
+                gender = choice(list(Gender)),
                 birth_date = birth_date,
                 password = password, # test only
                 password_hash = hash.it(password)
@@ -50,15 +49,15 @@ class Factory(BaseFactory):
         user = await self.first(query)
         if user is None:
             [name, surname, *_] = self.fake.name().split(' ')
-            birth_date = self.get_birth_date(RoleID.PATIENT)
+            birth_date = self.get_birth_date(Role.PATIENT)
             password = self.fake.password()
             user = User(
                 email = email,
-                role_id = RoleID.PATIENT.value,
+                role_type = Role.PATIENT,
                 iin = iin_from(birth_date, randint(1, 10**6 - 1)),
                 name = name,
                 surname = surname,
-                gender = choice(['male', 'female']),
+                gender = choice(list(Gender)),
                 birth_date = birth_date,
                 password = password, # test only
                 password_hash = hash.it(password)
@@ -80,24 +79,24 @@ class Factory(BaseFactory):
         await self.commit()
 
 
-    def get_role(self, patient_probability: int, doctor_probability: int) -> RoleID:
+    def get_role(self, patient_probability: int, doctor_probability: int) -> Role:
         return (
-            RoleID.PATIENT if self.fake.boolean(patient_probability) else
-            RoleID.DOCTOR if self.fake.boolean(100 * doctor_probability/(100 - patient_probability)) else
-            RoleID.MANAGER
+            Role.PATIENT if self.fake.boolean(patient_probability) else
+            Role.DOCTOR if self.fake.boolean(100 * doctor_probability/(100 - patient_probability)) else
+            Role.MANAGER
         )
 
 
-    def get_birth_date(self, role: RoleID) -> date:
+    def get_birth_date(self, role: Role) -> date:
         today = date.today()
         return (
             self.fake.date_between(
                 today - timedelta(days = 60 * 365),
                 today - timedelta(days = 20 * 365)
-            ) if role == RoleID.DOCTOR else self.fake.date_between(
+            ) if role == Role.DOCTOR else self.fake.date_between(
                 today - timedelta(days = 60 * 365),
                 today - timedelta(days = 20 * 365)
-            ) if role == RoleID.MANAGER else self.fake.date_between(
+            ) if role == Role.MANAGER else self.fake.date_between(
                 today - timedelta(days = 100 * 365),
                 today
             )
