@@ -41,6 +41,7 @@ class Query(BaseQuery):
             ),
             joinedload(Slot.patient),
             joinedload(Slot.type),
+            joinedload(Slot.records),
             joinedload(Slot.payment).joinedload(Payment.terminal),
             (joinedload(Slot.payment)
                 .joinedload(Payment.manager)

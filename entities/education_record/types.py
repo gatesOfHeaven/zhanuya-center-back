@@ -1,9 +1,8 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from .entity import EducationRecord
 
 
-class EducationRecordAsForeign(BaseModel):
+class EducationRecordAsForeign(BaseResponse):
     id: int
     organization: str
     startYear: int

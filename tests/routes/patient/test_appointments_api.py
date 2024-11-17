@@ -5,11 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timedelta
 
 from utils.facades import week, calc
-from entities.user import PatientAsForeign
 from entities.user.factory import Factory as UserFactory
 from entities.doctor.factory import Factory as DoctorFactory
-from entities.slot import MakeAppointmentReq, MySlotAsElement, SlotAsPrimary
 from routes.patient.doctors import FreeSlotsRes
+from routes.patient.appointments import SlotAsPrimary, PatientAsForeign, MakeAppointmentReq, MySlotAsElement
 from tests.utils.app import anyio_backend, client
 from tests.utils.db import temp_db
 

@@ -7,7 +7,7 @@ from fastapi import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils import connect_db
-from entities.user import User, UserQuery
+from entities.user import User, UserQuery, Role
 from .core import generate_token, authenticate_token
 
 
@@ -45,3 +45,16 @@ async def authenticate_me_if_token(
     try:
         return await UserQuery(db).get_by_id(authenticate_token(token))
     except: return None
+
+
+async def authenticate_me_as_doctor(
+    token: str = Header(alias='Auth'),
+    db: AsyncSession = Depends(connect_db)
+) -> User:
+    me = await authenticate_me(token, db)
+    if me.role_type == Role.DOCTOR and me.as_doctor is not None:
+        return me
+    raise HTTPException(
+        status.HTTP_403_FORBIDDEN,
+        'This Module Forbidden for You'
+    )

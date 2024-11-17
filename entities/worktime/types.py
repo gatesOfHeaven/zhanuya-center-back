@@ -1,9 +1,8 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from .entity import Worktime
 
 
-class WorktimeAsForeign(BaseModel):
+class WorktimeAsForeign(BaseResponse):
     startHours: int
     endHours: int
 

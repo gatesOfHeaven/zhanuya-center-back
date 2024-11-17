@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from random import randint
 
 from utils import connect_db
-from utils.bases import BaseResponse
+from utils.bases import GeneralResponse
 from utils.facades import auth, hash, mail, calc
 from entities.user import User, UserQuery, UserAsPrimary
 from entities.email_verification import EmailVerificationQuery
@@ -15,7 +15,7 @@ router = APIRouter(tags = ['auth'])
 
 
 verification_responses = {
-    status.HTTP_202_ACCEPTED: { 'model': BaseResponse },
+    status.HTTP_202_ACCEPTED: { 'model': GeneralResponse },
     status.HTTP_409_CONFLICT: { 'model': list[VerificationConflictElement] }
 }
 
@@ -63,7 +63,7 @@ async def send_verification_code(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return JSONResponse(
         status_code = 202,
-        content = BaseResponse.to_json('Verification Code is sent to your Email')
+        content = GeneralResponse.to_json('Verification Code is sent to your Email')
     )
 
 

@@ -1,5 +1,4 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from utils.facades import calc
 from entities.category import CategoryAsForeign
 from entities.room import RoomAsPrimary
@@ -9,7 +8,7 @@ from entities.education_record import EducationRecordAsForeign
 from .entity import Doctor
 
 
-class DoctorAsPrimary(BaseModel):
+class DoctorAsPrimary(BaseResponse):
     id: int
     name: str
     surname: str
@@ -48,7 +47,7 @@ class DoctorAsPrimary(BaseModel):
         ).model_dump()
 
 
-class DoctorAsForeign(BaseModel):
+class DoctorAsForeign(BaseResponse):
     id: int
     name: str
     surname: str

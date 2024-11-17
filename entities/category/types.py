@@ -1,9 +1,9 @@
-from pydantic import BaseModel
+from utils.bases import BaseResponse
 
 from .entity import Category
 
 
-class CategoryAsForeign(BaseModel):
+class CategoryAsForeign(BaseResponse):
     id: int
     title: str
 

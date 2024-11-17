@@ -7,6 +7,7 @@ from entities.slot import Slot
 from entities.workday import Workday
 from entities.doctor import Doctor
 from .entity import MedicalRecord
+from .values import MedicalRecordType
 
 
 class Query(BaseQuery):
@@ -18,7 +19,13 @@ class Query(BaseQuery):
         return await self.field(query)
 
 
-    async def paginate(self, me: User, offset: int, limit: int) -> list[MedicalRecord]:
+    async def paginate(
+        self,
+        me: User,
+        record_type: MedicalRecordType | None,
+        offset: int,
+        limit: int
+    ) -> list[MedicalRecord]:
         query = (
             select(MedicalRecord)
             .options(
@@ -30,7 +37,10 @@ class Query(BaseQuery):
                     )
                 )
             )
-            .where(MedicalRecord.slot.has(Slot.patient == me))
+            .where(
+                MedicalRecord.slot.has(Slot.patient == me),
+                MedicalRecord.type == record_type if record_type is not None else True
+            )
             .offset(offset).limit(limit)
         )
         return await self.fetch_all(query)

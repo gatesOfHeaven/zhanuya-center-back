@@ -1,9 +1,8 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from .entity import Room
 
 
-class RoomAsPrimary(BaseModel):
+class RoomAsPrimary(BaseResponse):
     id: int
     building_id: int
     address: str

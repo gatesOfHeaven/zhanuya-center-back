@@ -21,5 +21,5 @@ class MedicalRecord(BaseEntity):
     content = Column(String(500), nullable = False)
     approved_by = Column(Integer, ForeignKey('managers.id'), nullable = True)
 
-    slot: Mapped['Slot'] = relationship()
+    slot: Mapped['Slot'] = relationship(back_populates = 'records')
     approved_manager: Mapped[Optional['Manager']] = relationship()

@@ -35,7 +35,7 @@ class Slot(BaseEntity):
     patient: Mapped['User'] = relationship()
     workday: Mapped['Workday'] = relationship(back_populates = 'slots')
     payment: Mapped[Optional['Payment']] = relationship(back_populates = 'slot')
-    # records: Mapped[list['MedicalRecord']] = relationship(back_populates = 'slot')
+    records: Mapped[list['MedicalRecord']] = relationship(back_populates = 'slot')
 
 
     def start_datetime(self) -> datetime:

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+from utils.bases import BaseResponse
 from entities.user import User, Gender
 
 
@@ -24,7 +25,7 @@ class SignUpReq(BaseModel):
     password: str =Field(min_length = 8, max_length = 25, pattern = r'^[A-Za-z\d@$!%*?&]+$')
 
 
-class SignUpRes(BaseModel):
+class SignUpRes(BaseResponse):
     id: int
 
     @staticmethod

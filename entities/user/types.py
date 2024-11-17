@@ -1,11 +1,9 @@
-from pydantic import BaseModel
-from datetime import date
-
+from utils.bases import BaseResponse
 from utils.facades import calc
 from entities.user.entity import User
     
 
-class UserAsPrimary(BaseModel):
+class UserAsPrimary(BaseResponse):
     id: int
     name: str
     surname: str
@@ -18,29 +16,14 @@ class UserAsPrimary(BaseModel):
 
     @staticmethod
     def to_json(user: User):
-        birth_date: date = user.birth_date
         return UserAsPrimary(
             id = user.id,
             name = user.name,
             surname = user.surname,
             gender = user.gender.value,
-            birthDate = calc.time_to_str(birth_date),
+            birthDate = calc.time_to_str(user.birth_date),
             age = calc.get_age(user.birth_date),
             email = user.email,
             iin = user.iin,
             role = user.role_type.value
-        ).model_dump()
-    
-
-class PatientAsForeign(BaseModel):
-    id: int
-    name: str
-    surname: str
-
-    @staticmethod
-    def to_json(user: User):
-        return PatientAsForeign(
-            id = user.id,
-            name = user.name,
-            surname = user.surname
         ).model_dump()

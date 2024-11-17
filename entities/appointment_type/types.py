@@ -1,9 +1,8 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from .entity import AppointmentType
 
 
-class AppointmentTypeAsPrimary(BaseModel):
+class AppointmentTypeAsPrimary(BaseResponse):
     id: int
     name: str
     minDurationInMinutes: int
@@ -19,7 +18,7 @@ class AppointmentTypeAsPrimary(BaseModel):
         ).model_dump()
 
 
-class AppointmentTypeAsForeign(BaseModel):
+class AppointmentTypeAsForeign(BaseResponse):
     id: int
     name: str
 

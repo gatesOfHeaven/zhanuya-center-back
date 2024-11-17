@@ -1,9 +1,8 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from .entity import Building
 
 
-class BuildingAsForeign(BaseModel):
+class BuildingAsForeign(BaseResponse):
     id: int
     address: str
 

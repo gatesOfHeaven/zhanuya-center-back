@@ -1,10 +1,9 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from utils.facades import calc
 from .entity import Payment
 
 
-class ReceiptAsForeign(BaseModel):
+class ReceiptAsForeign(BaseResponse):
     id: int
     timestamp: str
     method: str

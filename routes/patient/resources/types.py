@@ -1,5 +1,4 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from entities.user import User
 from entities.doctor import Doctor
 from entities.category import Category, CategoryAsForeign
@@ -8,7 +7,7 @@ from entities.building import Building, BuildingAsForeign
 from entities.appointment_type import AppointmentType, AppointmentTypeAsPrimary
 
 
-class DoctorsAsResource(BaseModel):
+class DoctorsAsResource(BaseResponse):
     id: int
     name: str
     surname: str
@@ -22,7 +21,7 @@ class DoctorsAsResource(BaseModel):
         ).model_dump()
 
 
-class ResourcesRes(BaseModel):
+class ResourcesRes(BaseResponse):
     doctors: list[DoctorsAsResource]
     categories: list[CategoryAsForeign]
     offices: list[BuildingAsForeign]

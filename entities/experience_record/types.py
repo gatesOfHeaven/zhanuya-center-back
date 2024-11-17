@@ -1,10 +1,9 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from utils.facades import calc
 from .entity import ExperienceRecord
 
 
-class ExperienceRecordAsForeign(BaseModel):
+class ExperienceRecordAsForeign(BaseResponse):
     id: int
     organization: str
     startDate: str

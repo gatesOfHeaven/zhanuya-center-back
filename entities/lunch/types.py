@@ -1,10 +1,9 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from utils.facades import calc
 from .entity import Lunch
 
 
-class LunchAsForeign(BaseModel):
+class LunchAsForeign(BaseResponse):
     startTime: str
     endTime: str
 

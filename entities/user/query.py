@@ -4,6 +4,10 @@ from sqlalchemy.orm import joinedload
 from datetime import date
 
 from utils.bases import BaseQuery
+from entities.doctor import Doctor
+from entities.manager import Manager
+from entities.room import Room
+from entities.price import Price
 from .entity import User
 
 
@@ -83,7 +87,11 @@ class Query(BaseQuery):
     
     async def get_by_id(self, id: int) -> User | None:
         query = select(User).options(
-            joinedload(User.as_doctor),
-            joinedload(User.as_manager)
+            joinedload(User.as_doctor).options(
+                joinedload(Doctor.office).joinedload(Room.building),
+                joinedload(Doctor.price_list).joinedload(Price.appointment_type),
+                joinedload(Doctor.category)
+            ),
+            joinedload(User.as_manager).joinedload(Manager.building)
         ).where(User.id == id)
         return await self.first(query)

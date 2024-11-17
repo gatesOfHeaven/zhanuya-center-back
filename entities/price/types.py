@@ -1,9 +1,8 @@
-from pydantic import BaseModel
-
+from utils.bases import BaseResponse
 from .entity import Price
 
 
-class PriceAsPrimary(BaseModel):
+class PriceAsPrimary(BaseResponse):
     typeId: int
     typeName: str
     price: int

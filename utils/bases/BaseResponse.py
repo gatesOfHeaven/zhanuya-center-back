@@ -1,19 +1,27 @@
 from pydantic import BaseModel
 from typing import Generic, TypeVar
+from abc import ABC, abstractmethod
 
 
 T = TypeVar('T')
 
 
-class BaseResponse(BaseModel):
+class BaseResponse(BaseModel, ABC):
+    @staticmethod
+    @abstractmethod
+    def to_json(*args, **kwargs):
+        pass
+
+
+class GeneralResponse(BaseResponse):
     detail: str
 
     @staticmethod
     def to_json(detail: str):
-        return BaseResponse(detail = detail).model_dump()
+        return GeneralResponse(detail = detail).model_dump()
     
 
-class PaginationResponse(BaseModel, Generic[T]):
+class PaginationResponse(BaseResponse, Generic[T]):
     start: int
     end: int
     total: int
