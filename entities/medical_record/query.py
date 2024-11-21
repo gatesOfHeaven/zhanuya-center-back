@@ -11,10 +11,10 @@ from .values import MedicalRecordType
 
 
 class Query(BaseQuery):
-    async def total(self, me: User) -> int:
-        query = (
-            select(func.count(MedicalRecord.id))
-            .where(MedicalRecord.slot.has(Slot.patient == me))
+    async def total(self, me: User, record_type: MedicalRecordType | None) -> int:
+        query = select(func.count(MedicalRecord.id)).where(
+            MedicalRecord.slot.has(Slot.patient == me),
+            MedicalRecord.type == record_type if record_type is not None else True
         )
         return await self.field(query)
 

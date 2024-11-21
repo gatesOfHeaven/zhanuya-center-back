@@ -31,7 +31,7 @@ async def my_medical_records(
     return JSONResponse(PaginationResponse.to_json(
         offset = offset,
         limit = limit,
-        total = await medical_records_query.total(me),
+        total = await medical_records_query.total(me, record_type = record_type),
         page = [
             MedicalRecordAsElement.to_json(record)
             for record in medical_records
