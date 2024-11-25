@@ -19,8 +19,6 @@ class ReceiptAsForeign(BaseResponse):
             provider_repr = f'manager[id={profile.id}]\n{profile.name} {profile.surname}'
         else: provider_repr = 'not available'
 
-        print(payment.terminal, payment.manager)
-
         return ReceiptAsForeign(
             id = payment.id,
             timestamp = calc.time_to_str(payment.made_at, '%d.%m.%Y %H:%M'),

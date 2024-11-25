@@ -61,11 +61,12 @@ async def doctor_schedule(
     db: AsyncSession = Depends(connect_db)
 ):
     doctor = await DoctorQuery(db).get(id)
+    workdays = await WorkdayQuery(db).get_schedule(doctor, week_num)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
         content = ScheduleRes.to_json(
-            worktime = await WorktimeQuery(db).get_actual(),
-            schedule = await WorkdayQuery(db).get_schedule(doctor, week_num),
+            worktime = await WorktimeQuery(db).get(workdays[0].date) if workdays else None,
+            schedule = workdays,
             me = me
         )
     )
@@ -91,7 +92,6 @@ async def free_slots(
     end_timepoint = current_timepoint + timedelta(minutes = duration)
 
     while end_timepoint <= workday.end_datetime():
-        print(current_timepoint, end_timepoint)
         is_free = True
         next_timepoint = current_timepoint + timedelta(minutes = min_interval)
 

@@ -1,10 +1,10 @@
-from fastapi import APIRouter, status, Path, Body, Depends
+from fastapi import APIRouter, HTTPException, status, Path, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils import connect_db
 from utils.bases import GeneralResponse
-from utils.facades import auth, calc
+from utils.facades import auth, calc, exec
 from entities.user import User
 from entities.doctor import DoctorQuery
 from entities.appointment_type import AppointmentTypeQuery
@@ -12,7 +12,6 @@ from entities.price import PriceQuery
 from entities.workday import WorkdayQuery
 from entities.slot import SlotQuery
 from .types import SlotAsPrimary, MySlotAsElement, MakeAppointmentReq
-from .helpers import schedule_appointment_notification, unschedule_appointment_notification
 
 
 router = APIRouter(tags = ['appointments'])
@@ -53,15 +52,13 @@ async def make_appointment(
         ends_at = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time(),
         commit = False
     )
-    await db.commit()
-    schedule_appointment_notification(appointment)
 
-    # try:
-    #     schedule_appointment_notification(appointment)
-    #     await db.commit()
-    # except:
-    #     await db.rollback()
-    #     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    try:
+        await db.commit()
+        # exec.schedule_appointment_notification(appointment)
+    except:
+        await db.rollback()
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return JSONResponse(
         status_code = status.HTTP_201_CREATED,
         headers = auth.get_auth_headers(me),
@@ -109,16 +106,13 @@ async def edit_appointment(
         me = me,
         commit = False
     )
-    await db.commit()
-    unschedule_appointment_notification(appointment)
-    schedule_appointment_notification(appointment)
-    # try:
-    #     unschedule_appointment_notification(appointment)
-    #     schedule_appointment_notification(appointment)
-    #     await db.commit()
-    # except:
-    #     await db.rollback()
-    #     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    try:
+        await db.commit()
+        # exec.unschedule_appointment_notification(appointment)
+        # exec.schedule_appointment_notification(appointment)
+    except:
+        await db.rollback()
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
         content = SlotAsPrimary.to_json(appointment)
@@ -134,14 +128,12 @@ async def cancel_appointment(
     slot_query = SlotQuery(db)
     appointment = await slot_query.get(id, me)
     await slot_query.remove(appointment, me, commit = False)
-    await db.commit()
-    unschedule_appointment_notification(appointment)
-    # try:
-    #     unschedule_appointment_notification(appointment)
-    #     await db.commit()
-    # except:
-    #     await db.rollback()
-    #     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    try:
+        await db.commit()
+        # exec.unschedule_appointment_notification(appointment)
+    except:
+        await db.rollback()
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
         content = GeneralResponse.to_json('Appointment Canceled')

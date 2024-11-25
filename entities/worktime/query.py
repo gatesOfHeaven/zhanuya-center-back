@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from datetime import date
 
 from utils.bases import BaseQuery
@@ -8,20 +8,30 @@ from .entity import Worktime
 
 
 class Query(BaseQuery):
-    async def actual(self) -> Worktime | None:
+    async def actual(self) -> Worktime:
         query = (select(Worktime)
             .where(Worktime.end_date == None)
             .order_by(Worktime.start_date.desc())
         )
-        return await self.first(query)
-
-
-    async def get_actual(self) -> Worktime:
-        worktime = await self.actual()
+        worktime = await self.first(query)
         if worktime is None:
             raise HTTPException(
                 status.HTTP_501_NOT_IMPLEMENTED,
                 'Application has No Configuration'
+            )
+        return worktime
+    
+
+    async def get(self, day: date, raise_: bool = True) -> Worktime | None:
+        query = select(Worktime).where(
+            Worktime.start_date <= day,
+            or_(Worktime.end_date == None, day <= Worktime.end_date)
+        )
+        worktime = await self.first(query)
+        if raise_ and worktime is None:
+            raise HTTPException(
+                status.HTTP_501_NOT_IMPLEMENTED,
+                'Application has No Configuration for Given Day'
             )
         return worktime
     

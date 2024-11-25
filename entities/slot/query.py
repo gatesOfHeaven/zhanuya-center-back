@@ -1,8 +1,8 @@
 from fastapi import status, HTTPException
-from sqlalchemy import select, exists, func
+from sqlalchemy import select, exists, func, or_, and_
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import time
+from datetime import time, datetime, timedelta
 
 from utils.bases import BaseQuery
 from entities.user import User
@@ -109,10 +109,22 @@ class Query(BaseQuery):
         self.db.add(slot)
         if commit: await self.commit()
         return slot
-    
+
 
     async def my(self, me: User) -> list[Slot]:
         query = self.select_with_relations.where(Slot.patient_id == me.id)
+        return await self.fetch_all(query)
+
+
+    async def upcomings(self) -> list[Slot]:
+        after_halfhour = datetime.now() + timedelta(minutes = 30)
+        query = self.select_with_relations.where(or_(
+            Slot.date >= after_halfhour.date(),
+            and_(
+                Slot.date == after_halfhour.date(),
+                Slot.starts_at >= after_halfhour.time()
+            )
+        ))
         return await self.fetch_all(query)
         
 

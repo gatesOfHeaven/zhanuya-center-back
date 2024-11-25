@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 from utils import lifespan
 from utils.middlewares import DecodeBracketsMiddleware
 from routes.auth import auth_router
 from routes.patient import patient_router
-from dotenv import load_dotenv
+from routes.doctor import doctor_router
 
 
 load_dotenv()
@@ -21,6 +22,7 @@ app = FastAPI(
 
 app.include_router(auth_router, prefix = '/auth')
 app.include_router(patient_router)
+app.include_router(doctor_router)
 
 app.add_middleware(DecodeBracketsMiddleware)
 app.add_middleware(

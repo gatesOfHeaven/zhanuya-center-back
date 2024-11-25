@@ -52,17 +52,17 @@ class ScheduleDay(BaseResponse):
     
 
 class ScheduleRes(BaseResponse):
-    worktime: WorktimeAsForeign
+    worktime: WorktimeAsForeign | None
     schedule: list[ScheduleDay]
 
     @staticmethod
     def to_json(
-        worktime: Worktime,
+        worktime: Worktime | None,
         schedule: list[Workday],
         me: User | None
     ):
         return ScheduleRes(
-            worktime = WorktimeAsForeign.to_json(worktime),
+            worktime = WorktimeAsForeign.to_json(worktime) if worktime else None,
             schedule = [
                 ScheduleDay.to_json(workday, me)
                 for workday in schedule

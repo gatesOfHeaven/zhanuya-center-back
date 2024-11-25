@@ -64,11 +64,9 @@ async def test_doctor_schedule(
             response_data = ScheduleRes(**response.json())
 
             assert response.status_code == status.HTTP_200_OK
+            workdays = await WorkdayQuery(temp_db).get_schedule(doctor, week_num)
             assert response_data.model_dump() == ScheduleRes.to_json(
-                worktime = await WorktimeQuery(temp_db).get_actual(),
-                schedule = await WorkdayQuery(temp_db).get_schedule(
-                    doctor = doctor,
-                    week_num = week_num
-                ),
+                worktime = await WorktimeQuery(temp_db).get(workdays[0].date) if workdays else None,
+                schedule = workdays,
                 me = None
             )

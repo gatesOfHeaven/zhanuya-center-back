@@ -1,4 +1,4 @@
 from os import getenv
 
 
-SEED: str = getenv('SEED', '0404')
+SEED: str = getenv('SEED', '404')

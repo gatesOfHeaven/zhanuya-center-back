@@ -3,6 +3,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils import engine, asyncSession
 from utils.bases import BaseEntity
+
+from entities.worktime import Worktime
+from entities.user import User
+from entities.email_verification import EmailVerification
+from entities.category import Category
+from entities.building import Building
+from entities.room import Room
+from entities.doctor import Doctor
+from entities.manager import Manager
+from entities.terminal import Terminal
+from entities.appointment_type import AppointmentType
+from entities.price import Price
+from entities.education_record import EducationRecord
+from entities.experience_record import ExperienceRecord
+from entities.workday import Workday
+from entities.lunch import Lunch
+from entities.slot import Slot
+from entities.payment import Payment
+from entities.medical_record import MedicalRecord
+
 from entities.worktime.factory import Factory as WorktimeFactory
 from entities.user.factory import Factory as UserFactory
 from entities.email_verification.factory import Factory as EmailVerificationFactory
@@ -25,10 +45,10 @@ from entities.medical_record.factory import Factory as MedicalRecordFactory
 
 async def seed(db: AsyncSession):
     worktimes = await WorktimeFactory(db).seed()
-    users = await UserFactory(db).seed(500)
+    users = await UserFactory(db).seed(150)
     await EmailVerificationFactory(db).seed(users)
     categories = await CategoryFactory(db).seed()
-    buildings = await BuildingFactory(db).seed(3)
+    buildings = await BuildingFactory(db).seed(1)
     rooms = await RoomFactory(db).seed(25, buildings)
     doctors = await DoctorFactory(db).seed(users, categories, rooms)
     managers = await ManagerFactory(db).seed(users, buildings)
