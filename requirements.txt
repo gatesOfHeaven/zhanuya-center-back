@@ -11,5 +11,4 @@ aiosmtplib==3.0.2
 python-dotenv==1.0.1
 faker==30.3
 pytest==8.3.3
-celery[redis]==5.4.0
 apscheduler==3.10.4 # delete

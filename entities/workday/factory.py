@@ -25,7 +25,8 @@ class Factory(BaseFactory):
             ][0]
 
             for doctor in doctors:
-                starts_at = randint(worktime.starts_at, worktime.ends_at)
+                try: starts_at = randint(worktime.starts_at, worktime.ends_at - 4)
+                except ValueError: starts_at = randint(worktime.starts_at, worktime.ends_at)
                 ends_at = randint(starts_at, worktime.ends_at)
                 fakes.append(Workday(
                     doctor = doctor,

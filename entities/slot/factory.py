@@ -1,9 +1,15 @@
+from sqlalchemy import select, func, or_, and_
+from sqlalchemy.orm import joinedload
 from random import choice
-from datetime import time, timedelta
+from datetime import time, datetime, timedelta
 
 from utils.bases import BaseFactory
 from utils.facades import calc
 from entities.user import User, Role
+from entities.doctor import Doctor
+from entities.manager import Manager
+from entities.payment import Payment
+from entities.room import Room
 from entities.workday import Workday
 from entities.price import Price
 from .entity import Slot
@@ -45,3 +51,51 @@ class Factory(BaseFactory):
                 curr_time = next_time
         await self.flush(fakes)
         return fakes
+    
+
+    async def random(
+        self,
+        count: int,
+        finished_only: bool = False,
+        paid_only: bool = False
+    ) -> list[Slot]:
+        now = datetime.now()
+        conditions = []
+        if finished_only: conditions.append(or_(
+            Slot.date <= now.date(),
+            and_(
+                Slot.date == now.date(),
+                Slot.starts_at <= now.time()
+            )
+        ))
+        if paid_only: conditions.append(Slot.payment != None)
+
+        query = select(Slot).where(*conditions).options(
+            (joinedload(Slot.workday)
+                .joinedload(Workday.doctor)
+                .joinedload(Doctor.profile)
+            ),
+            (joinedload(Slot.workday)
+                .joinedload(Workday.doctor)
+                .joinedload(Doctor.category)
+            ),
+            (joinedload(Slot.workday)
+                .joinedload(Workday.doctor)
+                .joinedload(Doctor.office)
+                .joinedload(Room.building)
+            ),
+            (joinedload(Slot.workday)
+                .joinedload(Workday.doctor)
+                .joinedload(Doctor.price_list)
+                .joinedload(Price.appointment_type)
+            ),
+            joinedload(Slot.patient),
+            joinedload(Slot.type),
+            joinedload(Slot.records),
+            joinedload(Slot.payment).joinedload(Payment.terminal),
+            (joinedload(Slot.payment)
+                .joinedload(Payment.manager)
+                .joinedload(Manager.profile)
+            )
+        ).order_by(func.random()).limit(count)
+        return await self.fetch_all(query)
