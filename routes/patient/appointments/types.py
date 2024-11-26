@@ -3,7 +3,7 @@ from datetime import datetime
 
 from utils.bases import BaseResponse
 from utils.facades import calc
-from entities.user import User
+from entities.user import UserAsForeign
 from entities.slot import Slot
 from entities.medical_record import MedicalRecord
 from entities.doctor import DoctorAsForeign
@@ -19,20 +19,6 @@ class MakeAppointmentReq(BaseModel):
     typeId: int = Field(gt = 0)
     startsAt: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
     endsAt: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
-
-
-class PatientAsForeign(BaseResponse):
-    id: int
-    name: str
-    surname: str
-
-    @staticmethod
-    def to_json(user: User):
-        return PatientAsForeign(
-            id = user.id,
-            name = user.name,
-            surname = user.surname
-        ).model_dump()
     
 
 class MedicalRecordAsForeign(BaseResponse):
@@ -62,7 +48,7 @@ class SlotAsPrimary(BaseResponse):
     category: CategoryAsForeign
     room: RoomAsPrimary
     doctor: DoctorAsForeign
-    patient: PatientAsForeign
+    patient: UserAsForeign
     receipt: ReceiptAsForeign | None
     medicalRecords: list[MedicalRecordAsForeign] | None
 
@@ -79,7 +65,7 @@ class SlotAsPrimary(BaseResponse):
             category = CategoryAsForeign.to_json(slot.workday.doctor.category),
             room = RoomAsPrimary.to_json(slot.workday.doctor.office),
             doctor = DoctorAsForeign.to_json(slot.workday.doctor),
-            patient = PatientAsForeign.to_json(slot.patient),
+            patient = UserAsForeign.to_json(slot.patient),
             receipt = ReceiptAsForeign.to_json(slot.payment) if slot.payment else None,
             medicalRecords = [
                 MedicalRecordAsForeign.to_json(record) for record in slot.records

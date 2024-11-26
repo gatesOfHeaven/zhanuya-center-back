@@ -27,3 +27,17 @@ class UserAsPrimary(BaseResponse):
             iin = user.iin,
             role = user.role_type.value
         ).model_dump()
+
+
+class UserAsForeign(BaseResponse):
+    id: int
+    name: str
+    surname: str
+
+    @staticmethod
+    def to_json(user: User):
+        return UserAsForeign(
+            id = user.id,
+            name = user.name,
+            surname = user.surname
+        ).model_dump()

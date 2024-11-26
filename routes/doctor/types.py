@@ -3,7 +3,7 @@ from utils.facades import calc
 from entities.appointment_type import AppointmentTypeAsForeign
 from entities.worktime import Worktime, WorktimeAsForeign
 from entities.workday import Workday
-from entities.user import User, Gender
+from entities.user import User, Gender, UserAsForeign
 from entities.slot import Slot
 from entities.lunch import LunchAsForeign
 
@@ -13,6 +13,7 @@ class ScheduleSlot(BaseResponse):
     startTime: str
     endTime: str
     type: AppointmentTypeAsForeign
+    patient: UserAsForeign
 
     @staticmethod
     def to_json(slot: Slot):
@@ -20,7 +21,8 @@ class ScheduleSlot(BaseResponse):
             id = slot.id,
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),
-            type = AppointmentTypeAsForeign.to_json(slot.type)
+            type = AppointmentTypeAsForeign.to_json(slot.type),
+            patient = UserAsForeign.to_json(slot.patient)
         ).model_dump()
     
 
@@ -63,7 +65,7 @@ class MySchedule(BaseResponse):
         ).model_dump()
 
 
-class PaqtientAsPrimary(BaseResponse):
+class PatientAsPrimary(BaseResponse):
     id: int
     name: str
     surname: str
@@ -72,7 +74,7 @@ class PaqtientAsPrimary(BaseResponse):
 
     @staticmethod
     def to_json(patient: User):
-        return PaqtientAsPrimary(
+        return PatientAsPrimary(
             id = patient.id,
             name = patient.name,
             surname = patient.surname,

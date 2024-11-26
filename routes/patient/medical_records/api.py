@@ -6,8 +6,7 @@ from utils import connect_db
 from utils.bases import PaginationResponse
 from utils.facades import auth
 from entities.user import User
-from entities.medical_record import MedicalRecordType, MedicalRecordQuery
-from .types import MedicalRecordAsElement
+from entities.medical_record import MedicalRecordType, MedicalRecordQuery, MedicalRecordAsElement
 
 
 router = APIRouter(tags = ['medical-records'])
@@ -26,7 +25,7 @@ async def my_medical_records(
         record_type = record_type,
         offset = offset,
         limit = limit,
-        me = me
+        patient = me
     )
     return JSONResponse(PaginationResponse.to_json(
         offset = offset,

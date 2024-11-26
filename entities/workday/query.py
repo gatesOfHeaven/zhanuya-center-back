@@ -43,7 +43,7 @@ class Query(BaseQuery):
             Workday.date.in_(week.get_week(week_num = week_num))
         ).options(
             joinedload(Workday.lunch),
-            joinedload(Workday.slots)
+            joinedload(Workday.slots).joinedload(Slot.patient)
         )
         workdays:list[Workday] = (await self.db.execute(query)).unique().scalars().all()
 

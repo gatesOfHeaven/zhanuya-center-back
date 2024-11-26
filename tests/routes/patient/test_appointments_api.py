@@ -5,12 +5,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timedelta
 
 from utils.facades import week, calc, auth
-from entities.user import UserQuery
+from entities.user import UserQuery, UserAsForeign
 from entities.user.factory import Factory as UserFactory
 from entities.doctor.factory import Factory as DoctorFactory
 from entities.slot.factory import Factory as SlotFactory
 from routes.patient.doctors import FreeSlotsRes
-from routes.patient.appointments import SlotAsPrimary, PatientAsForeign, MakeAppointmentReq, MySlotAsElement
+from routes.patient.appointments import SlotAsPrimary, MakeAppointmentReq, MySlotAsElement
 from tests.utils.app import anyio_backend, client
 from tests.utils.db import temp_db
 
@@ -97,7 +97,7 @@ async def test_appointments_crud(
                 assert my_appointment.id == appointment_id
                 assert my_appointment.startTime == empty_slot.startTime
                 assert my_appointment.endTime == empty_slot.endTime
-                assert my_appointment.patient.model_dump() == PatientAsForeign.to_json(patient)
+                assert my_appointment.patient.model_dump() == UserAsForeign.to_json(patient)
             
             # delete appointment
             response = await client.delete(f'{route}/{appointment_id}', headers = headers)

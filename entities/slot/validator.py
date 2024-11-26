@@ -63,3 +63,16 @@ class Validator:
                 status.HTTP_408_REQUEST_TIMEOUT,
                 f'You Cannot {action} Your Appointment More'
             )
+        
+
+    @staticmethod
+    def validate_medical_history_access(slot: Slot):
+        now = datetime.now()
+        if now < slot.start_datetime() - timedelta(hours = 1): raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            'You Cannot See Medical Records of Current Patient Yet'
+        )
+        if now > slot.end_datetime() + timedelta(hours = 2): raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            'To Get Access You Need to Request'
+        )

@@ -11,9 +11,9 @@ from .values import MedicalRecordType
 
 
 class Query(BaseQuery):
-    async def total(self, me: User, record_type: MedicalRecordType | None) -> int:
+    async def total(self, patient: User, record_type: MedicalRecordType | None) -> int:
         query = select(func.count(MedicalRecord.id)).where(
-            MedicalRecord.slot.has(Slot.patient == me),
+            MedicalRecord.slot.has(Slot.patient == patient),
             MedicalRecord.type == record_type if record_type is not None else True
         )
         return await self.field(query)
@@ -21,7 +21,7 @@ class Query(BaseQuery):
 
     async def paginate(
         self,
-        me: User,
+        patient: User,
         record_type: MedicalRecordType | None,
         offset: int,
         limit: int
@@ -38,7 +38,7 @@ class Query(BaseQuery):
                 )
             )
             .where(
-                MedicalRecord.slot.has(Slot.patient == me),
+                MedicalRecord.slot.has(Slot.patient == patient),
                 MedicalRecord.type == record_type if record_type is not None else True
             )
             .offset(offset).limit(limit)

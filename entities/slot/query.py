@@ -68,7 +68,7 @@ class Query(BaseQuery):
         if not (im_patient or im_doctor or im_manager or is_terminal):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
-                'You Can See Only YOUR Appointments'
+                'You Unavailable For You'
             )
         return slot
 
