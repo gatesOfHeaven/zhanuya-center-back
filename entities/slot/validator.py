@@ -2,6 +2,8 @@ from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 
 from entities.user import User
+from entities.manager import Manager
+from entities.terminal import Terminal
 from entities.appointment_type import AppointmentType
 from .entity import Slot
 
@@ -63,7 +65,22 @@ class Validator:
                 status.HTTP_408_REQUEST_TIMEOUT,
                 f'You Cannot {action} Your Appointment More'
             )
-        
+
+
+    @staticmethod
+    def validate_access(slot: Slot, me: User):
+        doctor = slot.workday.doctor
+        building = doctor.office.building
+        am_i_patient = isinstance(me, User) and slot.patient == me
+        am_i_doctor = isinstance(me, User) and doctor == me.as_doctor
+        am_i_manager = isinstance(me, User) and isinstance(me.as_manager, Manager) and building == me.as_manager.building
+        is_terminal = isinstance(me, Terminal) and building == me.building
+        if not (am_i_patient or am_i_doctor or am_i_manager or is_terminal):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                'Appointment Unavailable For You'
+            )
+
 
     @staticmethod
     def validate_medical_history_access(slot: Slot):
@@ -74,5 +91,5 @@ class Validator:
         )
         if now > slot.end_datetime() + timedelta(hours = 2): raise HTTPException(
             status.HTTP_403_FORBIDDEN,
-            'To Get Access You Need to Request'
+            'You Need to Request Access'
         )

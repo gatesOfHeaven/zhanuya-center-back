@@ -1,0 +1,1 @@
+from .api import router as medical_records_router

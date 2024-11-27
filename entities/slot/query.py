@@ -58,18 +58,7 @@ class Query(BaseQuery):
                 status.HTTP_404_NOT_FOUND,
                 'Appointment Not Found'
             )
-        
-        doctor = slot.workday.doctor
-        building = doctor.office.building
-        im_patient = isinstance(me, User) and slot.patient == me
-        im_doctor = isinstance(me, User) and doctor == me.as_doctor
-        im_manager = isinstance(me, User) and isinstance(me.as_manager, Manager) and building == me.as_manager.building
-        is_terminal = isinstance(me, Terminal) and building == me.building
-        if not (im_patient or im_doctor or im_manager or is_terminal):
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                'You Unavailable For You'
-            )
+        Validator.validate_access(slot, me)
         return slot
 
 

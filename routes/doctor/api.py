@@ -1,7 +1,6 @@
-from fastapi import APIRouter, status, HTTPException, Path, Query, Body, Depends
+from fastapi import APIRouter, Path, Query, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime, timedelta
 
 from utils import connect_db
 from utils.bases import PaginationResponse
@@ -9,7 +8,6 @@ from utils.facades import auth
 from entities.user import User
 from entities.worktime import WorktimeQuery
 from entities.workday import WorkdayQuery
-from entities.user import UserQuery
 from entities.slot import SlotQuery, SlotValidator
 from entities.medical_record import MedicalRecordQuery, MedicalRecordType, MedicalRecordAsElement
 from .types import MySchedule, PatientAsPrimary
@@ -46,16 +44,20 @@ async def patient_profile(
     )
 
 
-@router.get('/appointments/{id}/patient/medical-records', response_model = PaginationResponse[MedicalRecordAsElement])
+@router.get(
+    '/appointments/{appointment_id}/patient/medical-records',
+    response_model = PaginationResponse[MedicalRecordAsElement],
+    tags = ['medical records']
+)
 async def patient_medical_history(
-    id: int = Path(gt = 0),
+    appointment_id: int = Path(gt = 0),
     record_type: MedicalRecordType | None = Query(default = None),
     offset: int = Query(ge = 0, default = 0),
     limit: int = Query(gt = 0, default = 10),
     me: User = Depends(auth.authenticate_me_as_doctor),
     db: AsyncSession = Depends(connect_db)
 ):
-    appointment = await SlotQuery(db).get(id, me)
+    appointment = await SlotQuery(db).get(appointment_id, me)
     SlotValidator.validate_medical_history_access(appointment)
     medical_record_query = MedicalRecordQuery(db)
     
@@ -64,7 +66,7 @@ async def patient_medical_history(
         content = PaginationResponse.to_json(
             offset = offset,
             limit = limit,
-            total = await medical_record_query.total(appointment.patient,record_type),
+            total = await medical_record_query.total(appointment.patient, record_type),
             page = [
                 MedicalRecordAsElement.to_json(record) for record in await medical_record_query.paginate(
                     patient = appointment.patient,

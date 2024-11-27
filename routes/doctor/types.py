@@ -24,7 +24,7 @@ class ScheduleSlot(BaseResponse):
             type = AppointmentTypeAsForeign.to_json(slot.type),
             patient = UserAsForeign.to_json(slot.patient)
         ).model_dump()
-    
+
 
 class ScheduleDay(BaseResponse):
     date: str
@@ -45,7 +45,7 @@ class ScheduleDay(BaseResponse):
             lunch = LunchAsForeign.to_json(workday.lunch) if workday.lunch else None,
             slots = [ScheduleSlot.to_json(slot,) for slot in workday.slots]
         ).model_dump() 
-    
+
 
 class MySchedule(BaseResponse):
     worktime: WorktimeAsForeign | None
