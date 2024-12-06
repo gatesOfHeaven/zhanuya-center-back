@@ -1,6 +1,6 @@
 from random import randint
 
-from utils.bases import BaseFactory
+from core.bases import BaseFactory
 from entities.doctor import Doctor
 from entities.appointment_type import AppointmentType
 from .entity import Price

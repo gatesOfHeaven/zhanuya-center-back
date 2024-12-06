@@ -1,4 +1,4 @@
-from utils.bases import BaseResponse
+from core.bases import BaseResponse
 from entities.user import User
 from entities.doctor import Doctor
 from entities.category import Category, CategoryAsForeign

@@ -1,8 +1,8 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils import engine, asyncSession
-from utils.bases import BaseEntity
+from core import engine, asyncSession
+from core.bases import BaseEntity
 
 from entities.worktime import Worktime
 from entities.user import User

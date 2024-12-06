@@ -1,6 +1,6 @@
 from random import randint, choice
 
-from utils.bases import BaseFactory
+from core.bases import BaseFactory
 from entities.building import Building
 from .entity import Room
 

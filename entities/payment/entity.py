@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, Enum, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, relationship
 from typing import TYPE_CHECKING, Optional
 
-from utils.bases import BaseEntity
+from core.bases import BaseEntity
 from .values import PaymentMethod, ProviderType
 
 if TYPE_CHECKING:

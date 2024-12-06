@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from datetime import datetime, timedelta
 
-from utils.bases import BaseQuery
+from core.bases import BaseQuery
 from .entity import EmailVerification
 from .values import code_expiring_mins
 

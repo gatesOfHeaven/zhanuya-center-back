@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from datetime import timedelta
 
-from utils.bases import BaseResponse
-from utils.facades import calc
+from core.bases import BaseResponse
+from core.facades import calc
 from entities.user import User
 from entities.doctor import Doctor, DoctorAsPrimary
 from entities.category import CategoryAsForeign

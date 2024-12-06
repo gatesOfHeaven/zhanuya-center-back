@@ -1,4 +1,4 @@
-from utils.bases import BaseFactory
+from core.bases import BaseFactory
 from .entity import Building
 
 

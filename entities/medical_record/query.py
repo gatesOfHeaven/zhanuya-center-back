@@ -3,7 +3,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 
-from utils.bases import BaseQuery
+from core.bases import BaseQuery
 from entities.user import User
 from entities.slot import Slot
 from entities.workday import Workday

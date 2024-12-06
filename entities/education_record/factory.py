@@ -1,7 +1,7 @@
 from random import randint, choice
 from datetime import date
 
-from utils.bases import BaseFactory
+from core.bases import BaseFactory
 from entities.doctor import Doctor
 from entities.manager import Manager
 from .entity import EducationRecord

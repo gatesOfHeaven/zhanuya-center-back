@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship, Mapped
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from utils.bases import BaseEntity
+from core.bases import BaseEntity
 
 if TYPE_CHECKING:
     from entities.doctor import Doctor

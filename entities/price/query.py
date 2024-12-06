@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.bases import BaseQuery
+from core.bases import BaseQuery
 from entities.doctor import Doctor
 from entities.appointment_type import AppointmentType
 from .entity import Price

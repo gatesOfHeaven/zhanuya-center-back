@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, Mapped
 from typing import TYPE_CHECKING
 
-from utils.bases import BaseEntity
+from core.bases import BaseEntity
 from entities.appointment_type import AppointmentType
 
 if TYPE_CHECKING:

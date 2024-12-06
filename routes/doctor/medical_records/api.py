@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Path, Body, Depends
+from fastapi import APIRouter, status, Path, Body, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils import connect_db
-from utils.bases import GeneralResponse
-from utils.facades import auth
+from core import connect_db
+from core.bases import GeneralResponse
+from utils.decorators import auth
 from entities.user import User
 from entities.slot import SlotQuery, SlotValidator
 from entities.medical_record import MedicalRecordQuery
@@ -27,7 +28,11 @@ async def add_medical_record(
         title = request_data.title,
         content = request_data.content
     )
-    return GeneralResponse.to_json('Successfuly Created')
+    return JSONResponse(
+        status_code = status.HTTP_201_CREATED,
+        headers = auth.get_auth_headers(me),
+        content = GeneralResponse.to_json('Successfuly Created')
+    )
 
 
 @router.put('/{id}', response_model = GeneralResponse)
@@ -45,7 +50,10 @@ async def edit_medical_record(
         title = request_data.title,
         content = request_data.content
     )
-    return GeneralResponse.to_json('Successfuly Edited')
+    return JSONResponse(
+        headers = auth.get_auth_headers(me),
+        content = GeneralResponse.to_json('Successfuly Edited')
+    )
 
 
 @router.delete('/{id}', response_model = GeneralResponse)
@@ -57,4 +65,7 @@ async def delete_medical_record(
     medical_record = await MedicalRecordQuery(db).get(id, me)
     SlotValidator.validate_medical_history_access(medical_record.slot)
     await MedicalRecordQuery(db).delete(medical_record, me)
-    return GeneralResponse.to_json('Successfuly Deleted')
+    return JSONResponse(
+        headers = auth.get_auth_headers(me),
+        content = GeneralResponse.to_json('Successfuly Deleted')
+    )

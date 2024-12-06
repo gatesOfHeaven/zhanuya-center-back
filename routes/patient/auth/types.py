@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from utils.bases import BaseResponse
+from core.bases import BaseResponse
 from entities.user import User, Gender
 
 

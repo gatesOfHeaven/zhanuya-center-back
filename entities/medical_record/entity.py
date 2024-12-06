@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Enum, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, relationship
 from typing import TYPE_CHECKING, Optional
 
-from utils.bases import BaseEntity
+from core.bases import BaseEntity
 from .values import MedicalRecordType
 
 if TYPE_CHECKING:

@@ -1,7 +1,7 @@
 from random import randint
 from datetime import date, timedelta
 
-from utils.bases import BaseFactory
+from core.bases import BaseFactory
 from entities.user import User, Role
 from .entity import EmailVerification
 from .values import code_expiring_mins

@@ -3,8 +3,8 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from utils import lifespan
-from utils.middlewares import DecodeBracketsMiddleware
+from core.middlewares import DecodeBracketsMiddleware
+from utils.lifespan import lifespan
 from routes.auth import auth_router
 from routes.patient import patient_router
 from routes.doctor import doctor_router

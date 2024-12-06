@@ -3,7 +3,7 @@ from sqlalchemy.orm import joinedload
 from random import choice
 from datetime import date, timedelta
 
-from utils.bases import BaseFactory
+from core.bases import BaseFactory
 from entities.user import User, Role
 from entities.category import Category
 from entities.room import Room

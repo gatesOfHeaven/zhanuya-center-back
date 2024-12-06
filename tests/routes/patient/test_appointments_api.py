@@ -4,7 +4,8 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timedelta
 
-from utils.facades import week, calc, auth
+from core.facades import week, calc
+from utils.decorators import auth
 from entities.user import UserQuery, UserAsForeign
 from entities.user.factory import Factory as UserFactory
 from entities.doctor.factory import Factory as DoctorFactory

@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, relationship
 from typing import TYPE_CHECKING
 
-from utils.bases import BaseEntity
+from core.bases import BaseEntity
 
 if TYPE_CHECKING:
     from entities.building import Building

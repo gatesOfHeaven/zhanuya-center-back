@@ -1,5 +1,5 @@
-from utils.bases import BaseResponse
-from utils.facades import calc
+from core.bases import BaseResponse
+from core.facades import calc
 from entities.appointment_type import AppointmentTypeAsForeign
 from entities.worktime import Worktime, WorktimeAsForeign
 from entities.workday import Workday

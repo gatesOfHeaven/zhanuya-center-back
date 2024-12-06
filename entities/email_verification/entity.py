@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
 
-from utils.bases import BaseEntity
+from core.bases import BaseEntity
 
 
 class EmailVerification(BaseEntity):

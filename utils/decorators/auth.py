@@ -6,9 +6,9 @@ from fastapi import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils import connect_db
+from core import connect_db
 from entities.user import User, UserQuery, Role
-from .core import generate_token, authenticate_token
+from core.facades.auth import generate_token, authenticate_token
 
 
 def get_auth_headers(me: User | None) -> dict[str, str] | None:

@@ -3,7 +3,7 @@ from sqlalchemy import select, func, or_, and_
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.bases import BaseQuery
+from core.bases import BaseQuery
 from entities.user import User
 from entities.category import Category
 from entities.price import Price

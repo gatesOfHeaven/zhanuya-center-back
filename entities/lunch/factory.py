@@ -1,7 +1,7 @@
 from random import randint
 from datetime import time, timedelta
 
-from utils.bases import BaseFactory
+from core.bases import BaseFactory
 from entities.workday import Workday
 from .entity import Lunch
 

@@ -1,6 +1,6 @@
 from pytest import mark
 
-from utils.facades import auth
+from core.facades import auth
 
 
 @mark.parametrize(('id'), [(1), (2), (0), (-1), (10**10), (-1 * 10**10)])

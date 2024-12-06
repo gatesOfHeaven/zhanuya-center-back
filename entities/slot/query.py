@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import time, datetime, timedelta
 
-from utils.bases import BaseQuery
+from core.bases import BaseQuery
 from entities.user import User
 from entities.doctor import Doctor
 from entities.manager import Manager

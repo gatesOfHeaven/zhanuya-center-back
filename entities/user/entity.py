@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Enum, Date
 from sqlalchemy.orm import relationship, Mapped
 from typing import TYPE_CHECKING, Optional
 
-from utils.bases import BaseEntity
+from core.bases import BaseEntity
 from .values import Role, Gender
 
 if TYPE_CHECKING:

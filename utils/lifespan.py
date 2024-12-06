@@ -1,14 +1,13 @@
 from fastapi import FastAPI
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-from datetime import datetime
+from contextlib import asynccontextmanager
 
-from .bases import BaseEntity
-from .db import engine, asyncSession
-from .facades import exec
+from core import engine, asyncSession
+from core.bases import BaseEntity
+from .decorators import exec
 from entities.slot import SlotQuery
 
 
+@asynccontextmanager
 async def lifespan(app: FastAPI):
     exec.start()
     async with engine.begin() as conn:
@@ -17,4 +16,5 @@ async def lifespan(app: FastAPI):
         upcoming_appointments = await SlotQuery(db).upcomings()
         for appointment in upcoming_appointments:
             exec.schedule_appointment_notification(appointment)
+            print(appointment.id, 'scheduled')
     yield

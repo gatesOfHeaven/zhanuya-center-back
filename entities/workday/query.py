@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import date, time
 from typing import Callable
 
-from utils.bases import BaseQuery
-from utils.facades import week
+from core.bases import BaseQuery
+from core.facades import week
 from entities.doctor import Doctor
 from entities.slot import Slot
 from .entity import Workday

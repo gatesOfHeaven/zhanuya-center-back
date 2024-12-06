@@ -3,7 +3,7 @@ from sqlalchemy import select, exists, or_
 from sqlalchemy.orm import joinedload
 from datetime import date
 
-from utils.bases import BaseQuery
+from core.bases import BaseQuery
 from entities.doctor import Doctor
 from entities.manager import Manager
 from entities.room import Room

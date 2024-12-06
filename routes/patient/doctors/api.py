@@ -3,8 +3,9 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timedelta
 
-from utils import connect_db
-from utils.facades import auth, calc
+from core import connect_db
+from core.facades import calc
+from utils.decorators import auth
 from entities.user import User
 from entities.doctor import DoctorQuery, DoctorAsPrimary
 from entities.worktime import WorktimeQuery

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from utils.bases import BaseEntity
+from core.bases import BaseEntity
 
 
 class AppointmentType(BaseEntity):

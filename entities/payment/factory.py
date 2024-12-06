@@ -1,7 +1,7 @@
 from random import choice, randint
 from datetime import datetime, timedelta
 
-from utils.bases import BaseFactory
+from core.bases import BaseFactory
 from entities.slot import Slot
 from entities.manager import Manager
 from entities.terminal import Terminal

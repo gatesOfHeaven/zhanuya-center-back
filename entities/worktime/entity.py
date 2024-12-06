@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Date
 
-from utils.bases import BaseEntity
+from core.bases import BaseEntity
 
 
 class Worktime(BaseEntity):

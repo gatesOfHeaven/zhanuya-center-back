@@ -3,8 +3,8 @@ from sqlalchemy.orm import joinedload
 from random import choice
 from datetime import time, datetime, timedelta
 
-from utils.bases import BaseFactory
-from utils.facades import calc
+from core.bases import BaseFactory
+from core.facades import calc
 from entities.user import User, Role
 from entities.doctor import Doctor
 from entities.manager import Manager

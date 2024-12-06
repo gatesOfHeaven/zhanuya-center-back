@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select
 
-from utils.bases import BaseQuery
+from core.bases import BaseQuery
 from .entity import Terminal
 
 

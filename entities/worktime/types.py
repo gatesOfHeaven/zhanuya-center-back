@@ -1,4 +1,4 @@
-from utils.bases import BaseResponse
+from core.bases import BaseResponse
 from .entity import Worktime
 
 

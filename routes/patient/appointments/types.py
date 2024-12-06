@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 
-from utils.bases import BaseResponse
-from utils.facades import calc
+from core.bases import BaseResponse
+from core.facades import calc
 from entities.user import UserAsForeign
 from entities.slot import Slot
 from entities.medical_record import MedicalRecord
