@@ -8,7 +8,6 @@ from .values import Role, Gender
 if TYPE_CHECKING:
     from entities.doctor import Doctor
     from entities.manager import Manager
-    from entities.slot import Slot
 
 
 class User(BaseEntity):

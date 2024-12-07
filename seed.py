@@ -6,7 +6,6 @@ from core.bases import BaseEntity
 
 from entities.worktime import Worktime
 from entities.user import User
-from entities.email_verification import EmailVerification
 from entities.category import Category
 from entities.building import Building
 from entities.room import Room
@@ -25,7 +24,6 @@ from entities.medical_record import MedicalRecord
 
 from entities.worktime.factory import Factory as WorktimeFactory
 from entities.user.factory import Factory as UserFactory
-from entities.email_verification.factory import Factory as EmailVerificationFactory
 from entities.category.factory import Factory as CategoryFactory
 from entities.building.factory import Factory as BuildingFactory
 from entities.room.factory import Factory as RoomFactory
@@ -46,7 +44,6 @@ from entities.medical_record.factory import Factory as MedicalRecordFactory
 async def seed(db: AsyncSession):
     worktimes = await WorktimeFactory(db).seed()
     users = await UserFactory(db).seed(150)
-    await EmailVerificationFactory(db).seed(users)
     categories = await CategoryFactory(db).seed()
     buildings = await BuildingFactory(db).seed(1)
     rooms = await RoomFactory(db).seed(25, buildings)

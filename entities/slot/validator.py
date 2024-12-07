@@ -93,3 +93,13 @@ class Validator:
             status.HTTP_403_FORBIDDEN,
             'You Need to Request Access'
         )
+
+
+    @staticmethod
+    def validate_pay_ability(slot: Slot):
+        starts_at = slot.start_datetime()
+        if not starts_at - timedelta(minutes = 20) < datetime.now() < starts_at + timedelta(minutes = 10):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                'You Cannot Confirm Your Appointment Now'
+            )

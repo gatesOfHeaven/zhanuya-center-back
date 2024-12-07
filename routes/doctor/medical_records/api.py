@@ -11,7 +11,7 @@ from entities.medical_record import MedicalRecordQuery
 from .types import AddMedicalRecordReq, EditMedicalRecordReq
 
 
-router = APIRouter(tags = ['medical records'])
+router = APIRouter(prefix = '/medical-records', tags = ['medical records'])
 
 
 @router.post('', response_model = GeneralResponse)

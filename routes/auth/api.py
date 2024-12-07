@@ -9,7 +9,7 @@ from entities.user import UserQuery, UserAsPrimary
 from .types import SignInReq
 
 
-router = APIRouter(tags = ['for patient', 'for doctor', 'for manager', 'auth'])
+router = APIRouter(prefix = '/auth', tags = ['for patient', 'for doctor', 'for manager', 'auth'])
 
 
 @router.post('', response_model = UserAsPrimary)

@@ -13,7 +13,7 @@ from entities.workday import WorkdayQuery, CURR_WEEK_NUM
 from .types import DoctorAsElement, ScheduleRes, FreeSlotAsElement, FreeSlotsRes
 
 
-router = APIRouter(tags = ['doctors'])
+router = APIRouter(prefix = '/doctors', tags = ['doctors'])
 
 
 @router.get('', response_model = DoctorAsElement)

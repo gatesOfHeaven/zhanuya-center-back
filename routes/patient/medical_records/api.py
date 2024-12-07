@@ -9,7 +9,7 @@ from entities.user import User
 from entities.medical_record import MedicalRecordType, MedicalRecordQuery, MedicalRecordAsElement
 
 
-router = APIRouter(tags = ['medical records'])
+router = APIRouter(prefix = '/medical-records', tags = ['medical records'])
 
 
 @router.get('', response_model = PaginationResponse[MedicalRecordAsElement])

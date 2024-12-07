@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from typing import TypeVar
 
 from .BaseEntity import Entity
+from core.secondary_db import redis
 
 
 T = TypeVar('T')
@@ -34,3 +35,8 @@ class BaseQuery:
         
     async def fetch_all(self, query: Select[tuple[Entity]]) -> list[Entity]:
         return (await self.db.execute(query)).unique().scalars().all()
+    
+
+class SecondarySchemeQuery:
+    def __init__(self):
+        self.db = redis

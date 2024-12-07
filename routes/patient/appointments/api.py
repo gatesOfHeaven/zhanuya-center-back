@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core import connect_db
 from core.bases import GeneralResponse
 from core.facades import calc
-from utils.decorators import auth
+from utils.decorators import auth, exec
 from entities.user import User
 from entities.doctor import DoctorQuery
 from entities.appointment_type import AppointmentTypeQuery
@@ -15,7 +15,7 @@ from entities.slot import SlotQuery
 from .types import SlotAsPrimary, MySlotAsElement, MakeAppointmentReq
 
 
-router = APIRouter(tags = ['appointments'])
+router = APIRouter(prefix = '/appointments', tags = ['appointments'])
 
 
 @router.get('', response_model = list[MySlotAsElement])
@@ -52,6 +52,7 @@ async def make_appointment(
         starts_at = calc.str_to_time(request_data.startsAt, '%H:%M:%S').time(),
         ends_at = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time()
     )
+    exec.schedule_appointment_notification(appointment)
     return JSONResponse(
         status_code = status.HTTP_201_CREATED,
         headers = auth.get_auth_headers(me),
@@ -98,6 +99,7 @@ async def edit_appointment(
         end_time = calc.str_to_time(request_data.endsAt, '%H:%M:%S').time(),
         me = me
     )
+    exec.schedule_appointment_notification(appointment)
     return JSONResponse(
         headers = auth.get_auth_headers(me),
         content = SlotAsPrimary.to_json(appointment)
@@ -112,6 +114,7 @@ async def cancel_appointment(
 ):
     slot_query = SlotQuery(db)
     appointment = await slot_query.get(id, me)
+    await exec.unschedule_appointment_notification(appointment)
     await slot_query.remove(appointment, me)
     return JSONResponse(
         headers = auth.get_auth_headers(me),

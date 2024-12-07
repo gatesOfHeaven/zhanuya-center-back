@@ -8,6 +8,7 @@ from utils.lifespan import lifespan
 from routes.auth import auth_router
 from routes.patient import patient_router
 from routes.doctor import doctor_router
+from routes.terminal import terminal_router
 
 
 load_dotenv()
@@ -20,9 +21,10 @@ app = FastAPI(
     redirect_slashes = False
 )
 
-app.include_router(auth_router, prefix = '/auth')
+app.include_router(auth_router)
 app.include_router(patient_router)
 app.include_router(doctor_router)
+app.include_router(terminal_router)
 
 app.add_middleware(DecodeBracketsMiddleware)
 app.add_middleware(
@@ -43,3 +45,7 @@ if __name__ == '__main__':
         reload = True,
         port = 2222
     )
+    # docker run -d --name asyncredis -p 6379:6379 redis:latest
+    # docker start asyncredis
+    # docker stop asyncredis
+    # docker stop $(docker ps -q)

@@ -2,3 +2,5 @@
 test.ipynb
 /config/*.pem
 **/__pycache__/
+/.pytest_cache
+/__logs__

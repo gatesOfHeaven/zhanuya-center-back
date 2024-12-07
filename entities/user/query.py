@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select, exists, or_
 from sqlalchemy.orm import joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import date
 
 from core.bases import BaseQuery
@@ -12,6 +13,20 @@ from .entity import User
 
 
 class Query(BaseQuery):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db)
+        self.select_with_relations = select(User).options(
+            joinedload(User.as_doctor).options(
+                joinedload(Doctor.office).joinedload(Room.building),
+                joinedload(Doctor.price_list).joinedload(Price.appointment_type),
+                joinedload(Doctor.category),
+                joinedload(Doctor.education),
+                joinedload(Doctor.experience)
+            ),
+            joinedload(User.as_manager).joinedload(Manager.building)
+        )
+
+
     async def new(
         self,
         email: str,
@@ -48,10 +63,20 @@ class Query(BaseQuery):
 
         if commit: await self.commit()
         return user
-        
+
+
+    async def email_is_available(self, email: str) -> bool:
+        query = select(exists(User).where(User.email == email))
+        return not await self.field(query)
+
+
+    async def iin_is_available(self, iin: str) -> bool:
+        query = select(exists(User).where(User.iin == iin))
+        return not await self.field(query)
+
 
     async def get_by_email(self, email: str, password_hash: str) -> User:
-        query = select(User).where(
+        query = self.select_with_relations.where(
             User.email == email,
             User.password_hash == password_hash
         )
@@ -65,13 +90,8 @@ class Query(BaseQuery):
         return user
 
 
-    async def iin_is_available(self, iin: str) -> bool:
-        query = select(exists(User).where(User.iin == iin))
-        return not await self.field(query)
-
-
     async def get_by_iin(self, iin: str, password_hash: str) -> User:
-        query = select(User).where(
+        query = self.select_with_relations.where(
             User.iin == iin,
             User.password_hash == password_hash
         )

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Enum, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, Enum, DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, relationship
 from typing import TYPE_CHECKING, Optional
 
@@ -21,7 +21,7 @@ class Payment(BaseEntity):
     id = Column(Integer, primary_key = True)
     slot_id = Column(Integer, ForeignKey('slots.id'), nullable = False)
     method: Mapped[PaymentMethod] = Column(Enum(PaymentMethod), default = PaymentMethod.CACHE, nullable = False)
-    made_at = Column(DateTime, nullable = False)
+    made_at = Column(DateTime, server_default = func.now())
     provider_type: Mapped[ProviderType] = Column(Enum(ProviderType), default = ProviderType.TERMINAL, nullable = False)
     provider_id = Column(Integer, nullable = False)
 

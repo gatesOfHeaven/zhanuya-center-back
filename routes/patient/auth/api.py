@@ -5,14 +5,14 @@ from random import randint
 
 from core import connect_db
 from core.bases import GeneralResponse
-from core.facades import hash, mail, calc
+from core.facades import hash, mail, calc, memo
 from utils.decorators import auth
 from entities.user import User, UserQuery, UserAsPrimary
-from entities.email_verification import EmailVerificationQuery
+from .helpers import key_for
 from .types import SendVerificationReq, VerificationConflictElement, SignUpReq, SignUpRes
 
 
-router = APIRouter(tags = ['auth'])
+router = APIRouter(prefix = '/auth', tags = ['auth'])
 
 
 verification_responses = {
@@ -26,12 +26,7 @@ async def send_verification_code(
     request_data: SendVerificationReq = Body(),
     db: AsyncSession = Depends(connect_db)
 ):
-    verification_code = randint(1000, 9999)
-    email_ok = await EmailVerificationQuery(db).new(
-        request_data.email,
-        verification_code,
-        commit = False
-    )
+    email_ok = await UserQuery(db).email_is_available(request_data.email)
     iin_ok = await UserQuery(db).iin_is_available(request_data.iin)
 
     if not email_ok or not iin_ok:
@@ -50,9 +45,10 @@ async def send_verification_code(
             status_code = status.HTTP_409_CONFLICT,
             content = [field.model_dump() for field in fields]
         )
-
+    
+    verification_code = randint(1000, 9999)
     try:
-        await db.commit()
+        await memo.save(key_for(request_data.email), verification_code, 10)
         await mail.send(
             request_data.email,
             'Email Verification',
@@ -60,7 +56,6 @@ async def send_verification_code(
         )
     except Exception as e:
         print(e)
-        await db.rollback()
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return JSONResponse(
         status_code = 202,
@@ -73,11 +68,11 @@ async def sign_up(
     request_data: SignUpReq = Body(),
     db: AsyncSession = Depends(connect_db)
 ):
-    await EmailVerificationQuery(db).verify(
-        request_data.email,
-        request_data.emailVerificationCode,
-        commit = False
-    )
+    if not await memo.verify(key_for(request_data.email), request_data.emailVerificationCode):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            'Verification Code is Wrong or has been Expired. Please Try Again'
+        )
     user_query = UserQuery(db)
     user = await user_query.new(
         name = request_data.name,

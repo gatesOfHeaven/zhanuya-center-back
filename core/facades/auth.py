@@ -14,18 +14,18 @@ with open(f'{path_to_keys_dir}/private-key.pem', 'rb') as file:
     PRIVATE_KEY = file.read()
     
 
-def generate_token(id: int) -> str:
+def generate_token(payload) -> str:
     return encode(
         {
             'exp': int(time()) + timedelta(hours = 12).seconds,
-            payload_key: id
+            payload_key: payload
         },
         PRIVATE_KEY,
         algorithm
     )
 
 
-def authenticate_token(token: str) -> int:
+def authenticate_token(token: str):
     return decode(
         token.replace('Bearer ', '').strip(),
         PUBLIC_KEY,
