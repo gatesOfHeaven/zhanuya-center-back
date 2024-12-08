@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     async with asyncSession() as db:
         upcoming_appointments = await SlotQuery(db).upcomings()
         for appointment in upcoming_appointments:
-            exec.schedule_appointment_notification(appointment)
+            exec.schedule_appointment_notification(appointment, save_log = False)
             logs.append(f'{datetime.now()}: {appointment.id}')
     async with asyncopen(LOG_DIR / 'scheduled-appointments.txt', 'w') as file:
         await file.write('\n'.join(logs))

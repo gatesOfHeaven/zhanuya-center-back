@@ -5,7 +5,7 @@ from random import randint
 
 from core import connect_db
 from core.bases import GeneralResponse
-from core.facades import memo, mail
+from core.facades import memo, mail, calc
 from utils.decorators import auth
 from entities.terminal import Terminal
 from entities.slot import SlotQuery, SlotValidator
@@ -48,14 +48,21 @@ async def confirm_appointment(
 ):
     appointment = await SlotQuery(db).get(id, terminal)
     SlotValidator.validate_pay_ability(appointment)
-    payment = await PaymentQuery(db).new(
+    await PaymentQuery(db).new(
         slot = appointment,
         payment_method = request_data.method,
         provider = terminal,
         commit = False
     )
+    doctor = appointment.workday.doctor
     if await memo.verify(key_for(appointment), request_data.confirmationCode):
         await db.commit()
+        await mail.send(
+            reciever_email = doctor.profile.email,
+            subject = 'Appointment Confirmed',
+            content = f'{appointment.patient.name} {appointment.patient.surname} confirmed an appointment!'
+            f'Wait for patient in office {doctor.office.title} at {calc.time_to_str(appointment.starts_at, '%H:%M:%S')}'
+        )
     else: raise HTTPException(
         status.HTTP_400_BAD_REQUEST,
         'Payment declined. Confirmation Code is Wrong. Please try again'

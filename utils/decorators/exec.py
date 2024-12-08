@@ -12,12 +12,13 @@ def job_id(appointment: Slot) -> str:
     return f'slot-{appointment.id}-patient'
 
 
-def schedule_appointment_notification(appointment: Slot, hours: int = 3):
+def schedule_appointment_notification(appointment: Slot, hours: int = 3, save_log: bool = True):
     async def notify_about_appointment(appointment: Slot):
         profile = appointment.workday.doctor.profile
         office = appointment.workday.doctor.office
-        async with asyncopen(LOG_DIR / 'notified-appointments.txt', 'a') as file:
-            await file.write(f'\n{datetime.now()}: {appointment.id}')
+        if save_log:
+            async with asyncopen(LOG_DIR / 'notified-appointments.txt', 'a') as file:
+                await file.write(f'\n{datetime.now()}: {appointment.id}')
         await mail.send(
             appointment.patient.email,
             'You have an Appointment',
