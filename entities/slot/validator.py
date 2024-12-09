@@ -6,6 +6,7 @@ from entities.manager import Manager
 from entities.terminal import Terminal
 from entities.appointment_type import AppointmentType
 from .entity import Slot
+from .values import TIMEDELTA_BEFORE_START_TO_CONFIRM, TIMEDELTA_AFTER_START_TO_CONFIRM
 
 
 class Validator:
@@ -98,7 +99,9 @@ class Validator:
     @staticmethod
     def validate_pay_ability(slot: Slot):
         starts_at = slot.start_datetime()
-        if not starts_at - timedelta(minutes = 20) < datetime.now() < starts_at + timedelta(minutes = 10):
+        left_bound = starts_at - TIMEDELTA_BEFORE_START_TO_CONFIRM
+        right_bound = starts_at + TIMEDELTA_AFTER_START_TO_CONFIRM
+        if not left_bound < datetime.now() < right_bound:
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
                 'You Cannot Confirm Your Appointment Now'

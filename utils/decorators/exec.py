@@ -34,6 +34,7 @@ def schedule_appointment_notification(appointment: Slot, hours: int = 3, save_lo
 
 
 async def unschedule_appointment_notification(appointment: Slot):
+    error_msg = None
     try: remove(job_id(appointment))
     except JobLookupError as e: error_msg = e
     async with asyncopen(LOG_DIR / ('errors.txt' if error_msg else'canceled-appointments.txt'), 'a') as file:

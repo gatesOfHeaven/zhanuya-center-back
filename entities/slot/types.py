@@ -1,8 +1,18 @@
+from pydantic import BaseModel, Field
+
 from core.bases import BaseResponse
 from core.facades import calc
 from entities.category import CategoryAsForeign
-from entities.slot import Slot
 from entities.appointment_type import AppointmentTypeAsForeign
+from .entity import Slot
+
+
+class MakeAppointmentReq(BaseModel):
+    doctorId: int = Field(gt = 0)
+    date: str = Field(pattern = r'\d{2}\.\d{2}\.\d{4}')
+    typeId: int = Field(gt = 0)
+    startsAt: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
+    endsAt: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
 
 
 class SlotAsForeign(BaseResponse):

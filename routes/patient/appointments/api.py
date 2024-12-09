@@ -11,8 +11,8 @@ from entities.doctor import DoctorQuery
 from entities.appointment_type import AppointmentTypeQuery
 from entities.price import PriceQuery
 from entities.workday import WorkdayQuery
-from entities.slot import SlotQuery
-from .types import SlotAsPrimary, MySlotAsElement, MakeAppointmentReq
+from entities.slot import SlotQuery, MakeAppointmentReq
+from .types import SlotAsPrimary, MySlotAsElement
 
 
 router = APIRouter(prefix = '/appointments', tags = ['appointments'])
@@ -60,7 +60,7 @@ async def make_appointment(
     )
 
 
-@router.get('/{id}', response_model = SlotAsPrimary, tags = ['for doctor'])
+@router.get('/{id}', response_model = SlotAsPrimary, tags = ['for doctor', 'for manager'])
 async def get_appointment(
     id: int = Path(gt = 0),
     me: User = Depends(auth.authenticate_me),

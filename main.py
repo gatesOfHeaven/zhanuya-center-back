@@ -8,6 +8,7 @@ from utils.lifespan import lifespan
 from routes.auth import auth_router
 from routes.patient import patient_router
 from routes.doctor import doctor_router
+from routes.manager import manager_router
 from routes.terminal import terminal_router
 
 
@@ -23,7 +24,9 @@ app = FastAPI(
 
 app.include_router(auth_router)
 app.include_router(patient_router)
+app.include_router(manager_router)
 app.include_router(doctor_router)
+app.include_router(manager_router)
 app.include_router(terminal_router)
 
 app.add_middleware(DecodeBracketsMiddleware)

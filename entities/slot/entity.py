@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Optional
 
 from core.bases import BaseEntity
+from .values import  AppointmentStatus, TIMEDELTA_AFTER_START_TO_CONFIRM
 
 if TYPE_CHECKING:
     from entities.user import User
@@ -45,6 +46,15 @@ class Slot(BaseEntity):
     def end_datetime(self) -> datetime:
         day = self.date if self.date else self.workday.date
         return datetime.combine(day, self.ends_at)
+    
+    def status(self) -> AppointmentStatus:
+        now = datetime.now()
+        start_datetime = self.start_datetime()
+        return (
+            AppointmentStatus.BOOKED if start_datetime > now and self.payment is None else
+            AppointmentStatus.MISSED if start_datetime + TIMEDELTA_AFTER_START_TO_CONFIRM < now else
+            AppointmentStatus.OCCUPIED
+        )
     
     def duration(self) -> timedelta:
         return self.end_datetime() - self.start_datetime()

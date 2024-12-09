@@ -13,14 +13,6 @@ from entities.appointment_type import AppointmentTypeAsForeign
 from entities.payment import ReceiptAsForeign
 
 
-class MakeAppointmentReq(BaseModel):
-    doctorId: int = Field(gt = 0)
-    date: str = Field(pattern = r'\d{2}\.\d{2}\.\d{4}')
-    typeId: int = Field(gt = 0)
-    startsAt: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
-    endsAt: str = Field(pattern = r'\d{2}\:\d{2}\:\d{2}')
-    
-
 class MedicalRecordAsForeign(BaseResponse):
     title: str
     type: str

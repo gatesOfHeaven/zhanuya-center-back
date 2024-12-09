@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select, exists, or_
+from sqlalchemy import select, exists, or_, and_
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import date
@@ -105,7 +105,7 @@ class Query(BaseQuery):
         return user
     
     
-    async def get_by_id(self, id: int) -> User | None:
+    async def get_by_id(self, id: int, ) -> User:
         query = select(User).options(
             joinedload(User.as_doctor).options(
                 joinedload(Doctor.office).joinedload(Room.building),
@@ -114,4 +114,30 @@ class Query(BaseQuery):
             ),
             joinedload(User.as_manager).joinedload(Manager.building)
         ).where(User.id == id)
-        return await self.first(query)
+        user = await self.first(query)
+        if user is None:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                'User Not Found'
+            )
+        return user
+    
+
+    async def search(self, fullname: str | None, iin: str | None, limit: int) -> list[User]:
+        query = select(User).limit(limit)
+        if fullname is not None:
+            fullname = fullname.strip()
+            names = fullname.split(' ')
+            if len(names) == 1: query = query.where(or_(
+                User.name.ilike(f'{fullname}%'),
+                User.surname.ilike(f'{fullname}%')
+            ))
+            elif len(names) > 1: query = query.where(or_(
+                and_(User.name.ilike(f'{names[0]}%'), User.surname.ilike(f'{names[1]}%')),
+                and_(User.name.ilike(f'{names[1]}%'), User.surname.ilike(f'{names[0]}%'))
+            ))
+
+        if iin is not None:
+            query = query.where(User.iin.ilike(f'{iin}%'))
+
+        return await self.fetch_all(query)

@@ -8,10 +8,11 @@ from core.facades import week, calc
 from utils.decorators import auth
 from entities.user import UserQuery, UserAsForeign
 from entities.user.factory import Factory as UserFactory
+from entities.slot import MakeAppointmentReq
 from entities.doctor.factory import Factory as DoctorFactory
 from entities.slot.factory import Factory as SlotFactory
 from routes.patient.doctors import FreeSlotsRes
-from routes.patient.appointments import SlotAsPrimary, MakeAppointmentReq, MySlotAsElement
+from routes.patient.appointments import SlotAsPrimary, MySlotAsElement
 from tests.utils.app import anyio_backend, client
 from tests.utils.db import temp_db
 
@@ -132,7 +133,6 @@ async def test_finished_appointments(
         10, finished_only = finished_only, paid_only = paid_only
     ):
         patient = await UserQuery(temp_db).get_by_id(appointment.patient_id)
-        assert patient is not None
         response = await client.get(
             url = f'/patient/appointments/{appointment.id}',
             headers = auth.get_auth_headers(patient)

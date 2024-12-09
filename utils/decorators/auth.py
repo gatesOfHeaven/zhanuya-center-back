@@ -29,11 +29,8 @@ async def authenticate_me(
     token: str = Header(alias=user_auth_header_key),
     db: AsyncSession = Depends(connect_db)
 ) -> User:
-    try: me = await UserQuery(db).get_by_id(int(authenticate_token(token)))
+    try: return await UserQuery(db).get_by_id(int(authenticate_token(token)))
     except: raise HTTPException(status.HTTP_401_UNAUTHORIZED)
-    
-    if me is None: raise HTTPException(status.HTTP_401_UNAUTHORIZED)
-    return me
 
 
 async def authenticate_me_if_token(
@@ -58,6 +55,19 @@ async def authenticate_me_as_doctor(
     )
 
 
+async def authenticate_me_as_manager(
+    token: str = Header(alias = user_auth_header_key),
+    db: AsyncSession = Depends(connect_db)
+) -> User:
+    me = await authenticate_me(token, db)
+    if me.role_type == Role.MANAGER and me.as_manager is not None:
+        return me
+    raise HTTPException(
+        status.HTTP_403_FORBIDDEN,
+        'This Module Forbidden for You'
+    )
+
+
 def get_terminal_auth_headers(manager: User | Manager, terminal: Terminal):
     return { terminal_auth_header_key: generate_token(f'{manager.id}-{terminal.id}') }
 
@@ -66,11 +76,12 @@ async def authenticate_terminal(
     token: str = Header(alias = terminal_auth_header_key),
     db: AsyncSession = Depends(connect_db)
 ) -> Terminal:
-    try: payload: str = authenticate_token(token)
+    try:
+        payload: str = authenticate_token(token)
+        [manager_id, terminal_id] = map(int, payload.split('-'))
+        manager = await UserQuery(db).get_by_id(manager_id)
     except: raise HTTPException(status.HTTP_401_UNAUTHORIZED)
-    [manager_id, terminal_id] = map(int, payload.split('-'))
-    manager = await UserQuery(db).get_by_id(manager_id)
-    if manager is None or manager.as_manager is None:
+    if manager.as_manager is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED)
 
     return await TerminalQuery(db).get(terminal_id, manager.as_manager)

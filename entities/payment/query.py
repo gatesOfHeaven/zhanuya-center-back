@@ -1,6 +1,4 @@
-from fastapi import HTTPException, status
-from sqlalchemy import select
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from core.bases import BaseQuery
 from entities.slot import Slot
@@ -22,7 +20,8 @@ class Query(BaseQuery):
             slot = slot,
             method = payment_method,
             provider_type = ProviderType.MANAGER if isinstance(provider, Manager) else ProviderType.TERMINAL,
-            provider_id = provider.id
+            provider_id = provider.id,
+            made_at = datetime.now()
         )
         self.db.add(payment)
         if commit: await self.commit()
