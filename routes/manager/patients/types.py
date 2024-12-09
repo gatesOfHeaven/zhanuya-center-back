@@ -1,6 +1,12 @@
+from pydantic import BaseModel, Field
+
 from core.bases import BaseResponse
 from core.facades import calc
 from entities.user import User
+
+
+class InvitationReq(BaseModel):
+    email: str = Field(min_length = 5, max_length = 50)
 
 
 class PatientAsElement(BaseResponse):

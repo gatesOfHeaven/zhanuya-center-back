@@ -14,7 +14,7 @@ from .types import ScheduleRes
 router = APIRouter(prefix = '/doctors', tags = ['doctors'])
 
 
-@router.get('/{id}/{week_num}', response_model = list[ScheduleRes])
+@router.get('/{id}/{week_num}', response_model = ScheduleRes)
 async def doctor_schedule(
     id: int = Path(gt = 0),
     week_num: int = Path(ge = CURR_WEEK_NUM, le = 3),
@@ -28,6 +28,7 @@ async def doctor_schedule(
         content = ScheduleRes.to_json(
             worktime = await WorktimeQuery(db).get(workdays[0].date) if workdays else None,
             schedule = workdays,
-            show_patients = me.as_manager.building == doctor.office.building
+            show_patients = me.as_manager.building == doctor.office.building,
+            me = me
         )
     )

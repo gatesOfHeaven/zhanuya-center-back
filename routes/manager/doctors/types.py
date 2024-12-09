@@ -13,18 +13,21 @@ class ScheduleSlot(BaseResponse):
     startTime: str
     endTime: str
     type: AppointmentTypeAsForeign
+    mine: bool
     status:  AppointmentStatus
     patient: UserAsForeign | None
 
     @staticmethod
-    def to_json(slot: Slot, show_patients: bool):
+    def to_json(slot: Slot, show_patients: bool, me: User):
+        mine = slot.patient == me
         return ScheduleSlot(
             id = slot.id,
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),
             type = AppointmentTypeAsForeign.to_json(slot.type),
+            mine = mine,
             status = slot.status(),
-            patient = UserAsForeign.to_json(slot.patient) if show_patients else None,
+            patient = UserAsForeign.to_json(slot.patient) if show_patients or mine else None,
         ).model_dump()
     
 
@@ -37,7 +40,7 @@ class ScheduleDay(BaseResponse):
     slots: list[ScheduleSlot]
 
     @staticmethod
-    def to_json(workday: Workday, show_patients: bool):
+    def to_json(workday: Workday, show_patients: bool, me: User):
         time_format = '%H:%M:%S'
         return ScheduleDay(
             date = calc.time_to_str(workday.date),
@@ -45,7 +48,7 @@ class ScheduleDay(BaseResponse):
             startTime = calc.time_to_str(workday.starts_at, time_format),
             endTime = calc.time_to_str(workday.ends_at, time_format),
             lunch = LunchAsForeign.to_json(workday.lunch) if workday.lunch else None,
-            slots = [ScheduleSlot.to_json(slot, show_patients) for slot in workday.slots]
+            slots = [ScheduleSlot.to_json(slot, show_patients, me) for slot in workday.slots]
         ).model_dump() 
     
 
@@ -58,13 +61,14 @@ class ScheduleRes(BaseResponse):
     def to_json(
         worktime: Worktime | None,
         schedule: list[Workday],
-        show_patients: bool
+        show_patients: bool,
+        me: User
     ):
         return ScheduleRes(
             worktime = WorktimeAsForeign.to_json(worktime) if worktime else None,
             showPatients = show_patients,
             schedule = [
-                ScheduleDay.to_json(workday, show_patients)
+                ScheduleDay.to_json(workday, show_patients, me)
                 for workday in schedule
             ]
         ).model_dump()

@@ -1,10 +1,10 @@
-from fastapi import APIRouter, status, Path, Query, Body, Depends
+from fastapi import APIRouter, HTTPException, status, Path, Query, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core import connect_db
 from core.bases import GeneralResponse
-from core.facades import calc
+from core.facades import calc, mail
 from utils.decorators import auth, exec
 from entities.user import User, UserQuery
 from entities.doctor import DoctorQuery
@@ -12,7 +12,7 @@ from entities.workday import WorkdayQuery
 from entities.price import PriceQuery
 from entities.appointment_type import AppointmentTypeQuery
 from entities.slot import SlotQuery, MakeAppointmentReq
-from .types import PatientAsElement
+from .types import PatientAsElement, InvitationReq
 
 
 router = APIRouter(prefix = '/patients', tags = ['patients'])
@@ -32,6 +32,25 @@ async def search_patient(
             for patient in await UserQuery(db).search(fullname, iin, 5)
         ]
     )
+
+
+@router.post('', response_model = GeneralResponse)
+async def invite(
+    request_data: InvitationReq = Body(),
+    db: AsyncSession = Depends(connect_db),
+    me: User = Depends(auth.authenticate_me_as_manager)
+):
+    if not await UserQuery(db).email_is_available(request_data.email):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            'User Alreday Has an Account'
+        )
+    await mail.send(
+        reciever_email = request_data.email,
+        subject = 'Invitation',
+        content = 'Get started with HappyPatient! http://64.225.71.203:3000'
+    )
+    return JSONResponse(GeneralResponse('Invitation was sent'))
 
 
 @router.post('/{id}', response_model = GeneralResponse)

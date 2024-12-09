@@ -53,7 +53,7 @@ class Slot(BaseEntity):
         return (
             AppointmentStatus.BOOKED if start_datetime > now and self.payment is None else
             AppointmentStatus.MISSED if start_datetime + TIMEDELTA_AFTER_START_TO_CONFIRM < now else
-            AppointmentStatus.OCCUPIED
+            AppointmentStatus.CONFIRMED
         )
     
     def duration(self) -> timedelta:

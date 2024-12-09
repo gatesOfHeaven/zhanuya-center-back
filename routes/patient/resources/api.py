@@ -10,7 +10,7 @@ from entities.appointment_type import AppointmentTypeQuery
 from .types import ResourcesRes
 
 
-router = APIRouter(prefix = '/resources')
+router = APIRouter(prefix = '/resources', tags = ['resources'])
 
 
 @router.get('', response_model = ResourcesRes)

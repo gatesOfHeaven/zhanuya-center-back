@@ -8,6 +8,7 @@ from core.facades import hash, typo
 from utils.decorators import auth
 from entities.user import UserQuery
 from entities.terminal import Terminal, TerminalQuery
+from entities.payment import PaymentMethod
 from .types import AuthAsManagerReq
 
 router = APIRouter(prefix = '/terminal', tags = ['for terminal'])
@@ -41,3 +42,8 @@ async def turn_on_terminal(
 @router.get('/me')
 async def me(terminal: Terminal = Depends(auth.authenticate_terminal)):
     return terminal.id
+
+
+@router.get('/resources', response_model = list[str], tags = ['resources'])
+async def resources():
+    return JSONResponse(list(PaymentMethod))

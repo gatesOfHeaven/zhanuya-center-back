@@ -15,38 +15,27 @@ from entities.room import Room
 from entities.payment import Payment
 from .entity import Slot
 from .validator import Validator
+from .values import TIMEDELTA_BEFORE_START_TO_CONFIRM, TIMEDELTA_AFTER_START_TO_CONFIRM
 
 
 class Query(BaseQuery):
     def __init__(self, db: AsyncSession):
         super().__init__(db)
         self.select_with_relations = select(Slot).options(
-            (joinedload(Slot.workday)
-                .joinedload(Workday.doctor)
-                .joinedload(Doctor.profile)
+            joinedload(Slot.workday).joinedload(Workday.doctor).options(
+                joinedload(Doctor.profile),
+                joinedload(Doctor.category),
+                joinedload(Doctor.office).joinedload(Room.building),
+                joinedload(Doctor.price_list).joinedload(Price.appointment_type)
             ),
-            (joinedload(Slot.workday)
-                .joinedload(Workday.doctor)
-                .joinedload(Doctor.category)
-            ),
-            (joinedload(Slot.workday)
-                .joinedload(Workday.doctor)
-                .joinedload(Doctor.office)
-                .joinedload(Room.building)
-            ),
-            (joinedload(Slot.workday)
-                .joinedload(Workday.doctor)
-                .joinedload(Doctor.price_list)
-                .joinedload(Price.appointment_type)
-            ),
+            (joinedload(Slot.payment).options(
+                joinedload(Payment.manager)
+                .joinedload(Manager.profile)
+            )),
+            joinedload(Slot.payment).joinedload(Payment.terminal),
             joinedload(Slot.patient),
             joinedload(Slot.type),
-            joinedload(Slot.records),
-            joinedload(Slot.payment).joinedload(Payment.terminal),
-            (joinedload(Slot.payment)
-                .joinedload(Payment.manager)
-                .joinedload(Manager.profile)
-            )
+            joinedload(Slot.records)
         )
 
 
@@ -115,7 +104,18 @@ class Query(BaseQuery):
             )
         ))
         return await self.fetch_all(query)
-        
+
+
+    async def to_confirm(self, terminal: Terminal) -> list[Slot]:
+        now = datetime.now()
+        query = self.select_with_relations.where(
+            Room.building_id == terminal.building_id,
+            Slot.date == now.date(),
+            Slot.starts_at > (now - TIMEDELTA_BEFORE_START_TO_CONFIRM).time(),
+            Slot.starts_at < (now + TIMEDELTA_AFTER_START_TO_CONFIRM).time()
+        ).join(Slot.workday).join(Workday.doctor).join(Doctor.office)
+        return await self.fetch_all(query)
+
 
     async def edit(
         self,

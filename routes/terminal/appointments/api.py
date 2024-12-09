@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Path, Body, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from random import randint
 
@@ -10,10 +10,23 @@ from utils.decorators import auth
 from entities.terminal import Terminal
 from entities.slot import SlotQuery, SlotValidator
 from entities.payment import PaymentQuery
-from .helpers import key_for
+from .helpers import key_for, sse_from_appointments
 from .types import ConfirmAppointmentReq
 
 router = APIRouter(prefix = '/appointments', tags = ['appointments'])
+
+
+@router.get('')
+async def to_confirm(
+    terminal: Terminal = Depends(auth.authenticate_terminal),
+    db: AsyncSession = Depends(connect_db)
+):
+    try:
+        return StreamingResponse(
+            media_type = 'text/event-stream',
+            content = sse_from_appointments(SlotQuery(db), terminal)
+        )
+    except Exception as e: print(e)
 
 
 @router.post('/{id}', response_model = GeneralResponse)
