@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: dockerfile 
+    ports:
+      - "2222:2222"
+    volumes:
+      - ./back:/back
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - backend_network
+
+networks:
+  backend_network:
+    driver: bridge
