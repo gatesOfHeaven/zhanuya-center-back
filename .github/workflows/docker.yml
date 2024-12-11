@@ -27,8 +27,8 @@ jobs:
         docker build -t fastapi-backend .  # Build the Docker image with the backend Dockerfile
 
     - name: Save and Deploy Docker Image
-    env:
-      SSHPASS: ${{ secrets.SSH_PASS }}
-    run: |
-      # Save the Docker image as a tarball, then transfer it to the server
-      docker save fastapi-backend | sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 "docker load && docker-compose -f /HappyPatient/back/docker-compose.yml up -d"
+      env:
+        SSHPASS: ${{ secrets.SSH_PASS }}
+      run: |
+        # Save the Docker image as a tarball, then transfer it to the server
+        docker save fastapi-backend | sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 "docker load && docker-compose -f /HappyPatient/back/docker-compose.yml up -d"
