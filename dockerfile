@@ -17,7 +17,6 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Copy the rest of the application code to /back
 COPY . .
-
 # Expose the port (if needed for your application)
 EXPOSE 2222
 
