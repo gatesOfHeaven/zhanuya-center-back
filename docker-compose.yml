@@ -1,19 +1,9 @@
-version: "3.8"
-
+version: '3.8'
 services:
   backend:
     build:
       context: .
-      dockerfile: dockerfile 
+      dockerfile: dockerfile  # Map the local code to the /back directory in the container
     ports:
       - "2222:2222"
-    volumes:
-      - ./back:/back
-    environment:
-      - PYTHONUNBUFFERED=1
-    networks:
-      - backend_network
 
-networks:
-  backend_network:
-    driver: bridge
