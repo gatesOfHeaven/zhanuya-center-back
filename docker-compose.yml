@@ -9,6 +9,7 @@ services:
       - "2222:2222"
     depends_on:
       - asyncredis
+    restart: always
 
   asyncredis:
     image: redis:latest
@@ -16,3 +17,4 @@ services:
     ports:
       - "6379:6379"
     command: ["redis-server", "--save", "", "--appendonly", "no"]
+    restart: always
