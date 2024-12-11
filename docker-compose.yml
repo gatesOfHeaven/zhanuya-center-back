@@ -1,19 +1,18 @@
-version: "3.8"
+version: '4.0'
 
 services:
   backend:
     build:
       context: .
-      dockerfile: dockerfile 
+      dockerfile: dockerfile
     ports:
       - "2222:2222"
-    volumes:
-      - ./back:/back
-    environment:
-      - PYTHONUNBUFFERED=1
-    networks:
-      - backend_network
+    depends_on:
+      - asyncredis
 
-networks:
-  backend_network:
-    driver: bridge
+  asyncredis:
+    image: redis:latest
+    container_name: asyncredis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
