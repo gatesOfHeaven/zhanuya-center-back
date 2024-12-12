@@ -32,3 +32,4 @@ jobs:
       run: |
         docker save fastapi-backend | sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 \
         "docker load && cd /HappyPatient/back && git pull origin main && docker-compose down && docker-compose up --build -d"
+        
