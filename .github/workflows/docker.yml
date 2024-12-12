@@ -30,5 +30,15 @@ jobs:
       env:
         SSHPASS: ${{ secrets.SSH_PASS }}
       run: |
-        # Save the Docker image as a tarball, then transfer it to the server
-        docker save fastapi-backend | sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 "docker load && docker-compose -f /HappyPatient/back/docker-compose.yml up -d"
+        docker save fastapi-backend | sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 <<EOF
+          cd /HappyPatient/front
+
+          # Pull the latest code from GitHub
+          git pull origin main
+
+          # Stop and remove the running Docker containers
+          docker-compose down
+
+          # Rebuild the Docker image and start the containers
+          docker-compose up --build -d
+        EOF
