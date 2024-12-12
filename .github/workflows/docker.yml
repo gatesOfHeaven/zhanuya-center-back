@@ -16,29 +16,14 @@ jobs:
     - name: Set up Docker
       uses: docker/setup-buildx-action@v2
 
-    - name: Log in to Remote Server
-      env:
-        SSHPASS: ${{ secrets.SSH_PASS }} 
-      run: |
-        sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 "echo 'Logged in successfully!'"
-
     - name: Build Docker Image
       run: |
         docker build -t fastapi-backend .  # Build the Docker image with the backend Dockerfile
 
-    - name: Save and Deploy Docker Image
+    - name: Save and Deploy Docker Image to Remote Server
       env:
         SSHPASS: ${{ secrets.SSH_PASS }}
       run: |
-        docker save fastapi-backend | sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 <<EOF
-          cd /HappyPatient/front
-
-          # Pull the latest code from GitHub
-          git pull origin main
-
-          # Stop and remove the running Docker containers
-          docker-compose down
-
-          # Rebuild the Docker image and start the containers
-          docker-compose up --build -d
-        EOF
+        # Save the Docker image locally and transfer it to the remote server
+        docker save fastapi-backend | sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 \
+        "docker load && cd /HappyPatient/back && git pull origin main && docker-compose down && docker-compose up --build -d"
