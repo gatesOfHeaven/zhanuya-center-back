@@ -4,7 +4,7 @@ from datetime import datetime
 from core.bases import BaseResponse
 from core.facades import calc
 from entities.user import UserAsForeign
-from entities.slot import Slot
+from entities.slot import Slot, AppointmentStatus
 from entities.medical_record import MedicalRecord
 from entities.doctor import DoctorAsForeign
 from entities.category import CategoryAsForeign
@@ -36,6 +36,7 @@ class SlotAsPrimary(BaseResponse):
     startTime: str
     endTime: str
     price: int
+    status: AppointmentStatus
     type: AppointmentTypeAsForeign
     category: CategoryAsForeign
     room: RoomAsPrimary
@@ -53,6 +54,7 @@ class SlotAsPrimary(BaseResponse):
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),
             price = slot.price,
+            status = slot.status(),
             type = AppointmentTypeAsForeign.to_json(slot.type),
             category = CategoryAsForeign.to_json(slot.workday.doctor.category),
             room = RoomAsPrimary.to_json(slot.workday.doctor.office),

@@ -67,8 +67,10 @@ class Factory(BaseFactory):
         return (user, auth.generate_token(user.id))
     
 
-    async def get_random(self, count: int) -> list[User]:
+    async def get_random(self, count: int, role: Role | None = None) -> list[User]:
         query = select(User).order_by(func.random()).limit(count)
+        if role is not None:
+            query = query.where(User.role_type == role.name)
         return await self.fetch_all(query)
     
     

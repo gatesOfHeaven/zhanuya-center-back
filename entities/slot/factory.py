@@ -71,31 +71,19 @@ class Factory(BaseFactory):
         if paid_only: conditions.append(Slot.payment != None)
 
         query = select(Slot).where(*conditions).options(
-            (joinedload(Slot.workday)
-                .joinedload(Workday.doctor)
-                .joinedload(Doctor.profile)
+            joinedload(Slot.workday).joinedload(Workday.doctor).options(
+                joinedload(Doctor.profile),
+                joinedload(Doctor.category),
+                joinedload(Doctor.office).joinedload(Room.building),
+                joinedload(Doctor.price_list).joinedload(Price.appointment_type)
             ),
-            (joinedload(Slot.workday)
-                .joinedload(Workday.doctor)
-                .joinedload(Doctor.category)
-            ),
-            (joinedload(Slot.workday)
-                .joinedload(Workday.doctor)
-                .joinedload(Doctor.office)
-                .joinedload(Room.building)
-            ),
-            (joinedload(Slot.workday)
-                .joinedload(Workday.doctor)
-                .joinedload(Doctor.price_list)
-                .joinedload(Price.appointment_type)
-            ),
+            (joinedload(Slot.payment).options(
+                joinedload(Payment.manager)
+                .joinedload(Manager.profile)
+            )),
+            joinedload(Slot.payment).joinedload(Payment.terminal),
             joinedload(Slot.patient),
             joinedload(Slot.type),
-            joinedload(Slot.records),
-            joinedload(Slot.payment).joinedload(Payment.terminal),
-            (joinedload(Slot.payment)
-                .joinedload(Payment.manager)
-                .joinedload(Manager.profile)
-            )
+            joinedload(Slot.records)
         ).order_by(func.random()).limit(count)
         return await self.fetch_all(query)

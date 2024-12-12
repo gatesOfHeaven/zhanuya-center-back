@@ -43,7 +43,7 @@ from entities.medical_record.factory import Factory as MedicalRecordFactory
 
 async def seed(db: AsyncSession):
     worktimes = await WorktimeFactory(db).seed()
-    users = await UserFactory(db).seed(1000)
+    users = await UserFactory(db).seed(826)
     categories = await CategoryFactory(db).seed()
     buildings = await BuildingFactory(db).seed(3)
     rooms = await RoomFactory(db).seed(25, buildings)

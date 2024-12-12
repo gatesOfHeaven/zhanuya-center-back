@@ -50,7 +50,10 @@ async def invite(
         subject = 'Invitation',
         content = 'Get started with HappyPatient! http://64.225.71.203:3000'
     )
-    return JSONResponse(GeneralResponse('Invitation was sent'))
+    return JSONResponse(
+        headers = auth.get_auth_headers(me),
+        content = GeneralResponse.to_json('Invitation was sent')
+    )
 
 
 @router.post('/{id}', response_model = GeneralResponse)

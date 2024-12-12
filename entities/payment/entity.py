@@ -11,8 +11,8 @@ if TYPE_CHECKING:
     from entities.slot import Slot
 
 
-def get_primaryjoin_condition(entity: str, type: ProviderType) -> str:
-    return f'and_(Payment.provider_id == foreign({entity}.id), Payment.provider_type == "{type.name}")'
+def get_primaryjoin_condition(entity: str, provider_type: ProviderType) -> str:
+    return f'and_(Payment.provider_id == foreign({entity}.id), Payment.provider_type == "{provider_type.name}")'
 
 
 class Payment(BaseEntity):
@@ -20,7 +20,7 @@ class Payment(BaseEntity):
 
     id = Column(Integer, primary_key = True)
     slot_id = Column(Integer, ForeignKey('slots.id'), nullable = False)
-    method: Mapped[PaymentMethod] = Column(Enum(PaymentMethod), default = PaymentMethod.CACHE, nullable = False)
+    method: Mapped[PaymentMethod] = Column(Enum(PaymentMethod), default = PaymentMethod.CASH, nullable = False)
     made_at = Column(DateTime, server_default = func.now())
     provider_type: Mapped[ProviderType] = Column(Enum(ProviderType), default = ProviderType.TERMINAL, nullable = False)
     provider_id = Column(Integer, nullable = False)

@@ -48,11 +48,10 @@ class Slot(BaseEntity):
         return datetime.combine(day, self.ends_at)
     
     def status(self) -> AppointmentStatus:
-        now = datetime.now()
-        start_datetime = self.start_datetime()
+        is_editable = self.start_datetime() + TIMEDELTA_AFTER_START_TO_CONFIRM > datetime.now()
         return (
-            AppointmentStatus.BOOKED if start_datetime > now and self.payment is None else
-            AppointmentStatus.MISSED if start_datetime + TIMEDELTA_AFTER_START_TO_CONFIRM < now else
+            AppointmentStatus.BOOKED if is_editable and self.payment is None else
+            AppointmentStatus.MISSED if self.payment is None else
             AppointmentStatus.CONFIRMED
         )
     

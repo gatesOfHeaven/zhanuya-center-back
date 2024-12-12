@@ -11,7 +11,7 @@ from entities.terminal import Terminal
 from entities.slot import SlotQuery, SlotValidator
 from entities.payment import PaymentQuery
 from .helpers import key_for, sse_from_appointments
-from .types import ConfirmAppointmentReq
+from .types import ConfirmAppointmentReq, SlotAsPrimary
 
 router = APIRouter(prefix = '/appointments', tags = ['appointments'])
 
@@ -27,6 +27,17 @@ async def to_confirm(
             content = sse_from_appointments(SlotQuery(db), terminal)
         )
     except Exception as e: print(e)
+
+
+@router.get('/{id}')
+async def single_appointment(
+    id: int = Path(gt = 0),
+    terminal: Terminal = Depends(auth.authenticate_terminal),
+    db: AsyncSession = Depends(connect_db)
+):
+    appointment = await SlotQuery(db).get(id, terminal)
+    SlotValidator.validate_pay_ability(appointment)
+    return SlotAsPrimary.to_json(appointment)
 
 
 @router.post('/{id}', response_model = GeneralResponse)

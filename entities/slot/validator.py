@@ -101,7 +101,7 @@ class Validator:
         starts_at = slot.start_datetime()
         left_bound = starts_at - TIMEDELTA_BEFORE_START_TO_CONFIRM
         right_bound = starts_at + TIMEDELTA_AFTER_START_TO_CONFIRM
-        if not left_bound < datetime.now() < right_bound:
+        if not left_bound < datetime.now() < right_bound or slot.payment is not None:
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
                 'You Cannot Confirm Your Appointment Now'

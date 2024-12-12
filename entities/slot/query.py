@@ -110,6 +110,7 @@ class Query(BaseQuery):
         now = datetime.now()
         query = self.select_with_relations.where(
             Room.building_id == terminal.building_id,
+            Slot.payment == None,
             Slot.date == now.date(),
             Slot.starts_at > (now - TIMEDELTA_BEFORE_START_TO_CONFIRM).time(),
             Slot.starts_at < (now + TIMEDELTA_AFTER_START_TO_CONFIRM).time()
@@ -127,6 +128,7 @@ class Query(BaseQuery):
         me: User,
         commit: bool = True
     ) -> Slot:
+        Validator.validate_patient(slot, me, 'Edit')
         Validator.validate_doesnt_start(slot, 'Edit')
         slot.workday = workday
         slot.type = price.appointment_type

@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class PaymentMethod(str, Enum):
-    CACHE = 'cache'
+    CASH = 'cash'
     CARD = 'Bank Card'
     KASPI_QR = 'Kaspi QR'
     HALYK_QR = 'Halyk QR'
