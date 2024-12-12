@@ -29,7 +29,7 @@ async def to_confirm(
     except Exception as e: print(e)
 
 
-@router.get('/{id}')
+@router.get('/{id}', response_model = SlotAsPrimary)
 async def single_appointment(
     id: int = Path(gt = 0),
     terminal: Terminal = Depends(auth.authenticate_terminal),
