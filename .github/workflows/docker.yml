@@ -13,12 +13,6 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Set up SSH Agent
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
-
     - name: Set up Docker
       uses: docker/setup-buildx-action@v2
 
@@ -32,4 +26,4 @@ jobs:
       run: |
         docker save fastapi-backend | sshpass -p "${SSHPASS}" ssh -o StrictHostKeyChecking=no root@64.225.71.203 \
         "docker load && cd /HappyPatient/back && git pull origin main && docker-compose down && docker-compose up --build -d"
-        
+
