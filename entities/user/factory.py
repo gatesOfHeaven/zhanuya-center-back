@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from core.bases import BaseFactory
 from core.facades import hash, calc
 from core.facades import auth
+from entities.doctor import Doctor
 from .entity import User, Role, Gender
 
 
@@ -68,7 +69,10 @@ class Factory(BaseFactory):
     
 
     async def get_random(self, count: int, role: Role | None = None) -> list[User]:
-        query = select(User).order_by(func.random()).limit(count)
+        query = select(User).options(
+            joinedload(User.as_manager),
+            joinedload(User.as_doctor).joinedload(Doctor.office)
+        ).order_by(func.random()).limit(count)
         if role is not None:
             query = query.where(User.role_type == role.name)
         return await self.fetch_all(query)

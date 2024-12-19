@@ -1,7 +1,7 @@
 from core.bases import BaseResponse
 from core.facades import calc
 from entities.user.entity import User
-    
+
 
 class UserAsPrimary(BaseResponse):
     id: int
@@ -13,6 +13,7 @@ class UserAsPrimary(BaseResponse):
     email: str
     iin: str
     role: str
+    buildingId: int | None
 
     @staticmethod
     def to_json(user: User):
@@ -25,7 +26,12 @@ class UserAsPrimary(BaseResponse):
             age = calc.get_age(user.birth_date),
             email = user.email,
             iin = user.iin,
-            role = user.role_type.value
+            role = user.role_type.value,
+            buildingId = (
+                user.as_manager.building_id if user.as_manager else
+                user.as_doctor.office.building_id if user.as_doctor else
+                None
+            )
         ).model_dump()
 
 

@@ -87,3 +87,23 @@ class Factory(BaseFactory):
             joinedload(Slot.records)
         ).order_by(func.random()).limit(count)
         return await self.fetch_all(query)
+
+
+    async def by_doctor(self, doctor: Doctor, count: int) -> list[Slot]:
+        query = select(Slot).where(Slot.doctor_id == doctor.id).options(
+            joinedload(Slot.workday).joinedload(Workday.doctor).options(
+                joinedload(Doctor.profile),
+                joinedload(Doctor.category),
+                joinedload(Doctor.office).joinedload(Room.building),
+                joinedload(Doctor.price_list).joinedload(Price.appointment_type)
+            ),
+            (joinedload(Slot.payment).options(
+                joinedload(Payment.manager)
+                .joinedload(Manager.profile)
+            )),
+            joinedload(Slot.payment).joinedload(Payment.terminal),
+            joinedload(Slot.patient),
+            joinedload(Slot.type),
+            joinedload(Slot.records)
+        ).order_by(func.random()).limit(count)
+        return await self.fetch_all(query)

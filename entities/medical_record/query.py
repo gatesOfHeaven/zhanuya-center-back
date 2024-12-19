@@ -57,7 +57,6 @@ class Query(BaseQuery):
         if record_type is not None: medical_record.type = record_type
         if title is not None: medical_record.type = title
         if content is not None: medical_record.type = content
-        medical_record.approved_by = None
 
         await self.commit()
         return medical_record

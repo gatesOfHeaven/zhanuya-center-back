@@ -21,7 +21,5 @@ class MedicalRecord(BaseEntity):
     added_at = Column(DateTime, nullable = False)
     title = Column(String(_title_max_len), nullable = False)
     content = Column(String(_content_max_len), nullable = False)
-    approved_by = Column(Integer, ForeignKey('managers.id'), nullable = True)
 
     slot: Mapped['Slot'] = relationship(back_populates = 'records')
-    approved_manager: Mapped[Optional['Manager']] = relationship()

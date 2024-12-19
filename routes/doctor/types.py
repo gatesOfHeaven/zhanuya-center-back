@@ -4,7 +4,7 @@ from entities.appointment_type import AppointmentTypeAsForeign
 from entities.worktime import Worktime, WorktimeAsForeign
 from entities.workday import Workday
 from entities.user import User, Gender, UserAsForeign
-from entities.slot import Slot
+from entities.slot import Slot, AppointmentStatus
 from entities.lunch import LunchAsForeign
 
 
@@ -13,6 +13,7 @@ class ScheduleSlot(BaseResponse):
     startTime: str
     endTime: str
     type: AppointmentTypeAsForeign
+    status:  AppointmentStatus
     patient: UserAsForeign
 
     @staticmethod
@@ -22,7 +23,8 @@ class ScheduleSlot(BaseResponse):
             startTime = calc.time_to_str(slot.starts_at, '%H:%M:%S'),
             endTime = calc.time_to_str(slot.ends_at, '%H:%M:%S'),
             type = AppointmentTypeAsForeign.to_json(slot.type),
-            patient = UserAsForeign.to_json(slot.patient)
+            status = slot.status(),
+            patient = UserAsForeign.to_json(slot.patient),
         ).model_dump()
 
 

@@ -26,3 +26,7 @@ class User(BaseEntity):
 
     as_doctor: Mapped[Optional['Doctor']] = relationship(back_populates = 'profile')
     as_manager: Mapped[Optional['Manager']] = relationship(back_populates = 'profile')
+
+
+    def fullname(self) -> str:
+        return f'{self.name} {self.surname}'

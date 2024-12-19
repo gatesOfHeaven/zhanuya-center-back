@@ -58,6 +58,7 @@ class Query(BaseQuery):
         price: Price,
         starts_at: time,
         ends_at: time,
+        as_patient: bool = True,
         commit: bool = True
     ) -> Slot:
         if patient.id == workday.doctor_id:
@@ -78,7 +79,7 @@ class Query(BaseQuery):
         Validator.validate_workday_time(slot)
         await self.verify_occupation(slot)
         Validator.validate_isnt_past(slot)
-        await self.verify_am_i_free(slot, patient)
+        await self.verify_is_patient_free(slot, patient, as_patient)
 
         query = select(func.max(Slot.index)).where(Slot.patient == patient)
         index = await self.field(query)
@@ -140,7 +141,7 @@ class Query(BaseQuery):
         Validator.validate_workday_time(slot)
         await self.verify_occupation(slot)
         Validator.validate_isnt_past(slot)
-        await self.verify_am_i_free(slot, me)
+        await self.verify_is_patient_free(slot, me)
         
         if commit: await self.commit()
         return slot
@@ -169,7 +170,7 @@ class Query(BaseQuery):
             )
 
 
-    async def verify_am_i_free(self, slot: Slot, me: User) -> None:
+    async def verify_is_patient_free(self, slot: Slot, me: User, as_patient: bool = True) -> None:
         query = select(exists(Slot).where(
             Slot.date == slot.workday.date,
             Slot.starts_at < slot.ends_at,
@@ -177,9 +178,9 @@ class Query(BaseQuery):
             Slot.patient_id == me.id,
             Slot.id != slot.id
         ))
-        am_i_busy = await self.field(query)
-        if am_i_busy:
-            raise HTTPException(
-                status.HTTP_406_NOT_ACCEPTABLE,
-                'You Have Another Appointment At This Time'
-            )
+        is_patient_busy = await self.field(query)
+        who_have = 'You have' if as_patient else f'{me.fullname()} has'
+        if is_patient_busy: raise HTTPException(
+            status.HTTP_406_NOT_ACCEPTABLE,
+            f'{who_have} Another Appointment At This Time'
+        )
