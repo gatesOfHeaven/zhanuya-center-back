@@ -1,9 +1,9 @@
-from fastapi import APIRouter, status, Path, Body, Depends
+from fastapi import APIRouter, status, Path, Query, Body, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core import connect_db
-from core.bases import GeneralResponse
+from core.bases import GeneralResponse, PaginationResponse
 from core.facades import calc
 from utils.decorators import auth, exec
 from entities.user import User
@@ -11,22 +11,36 @@ from entities.doctor import DoctorQuery
 from entities.appointment_type import AppointmentTypeQuery
 from entities.price import PriceQuery
 from entities.workday import WorkdayQuery
-from entities.slot import SlotQuery, MakeAppointmentReq
+from entities.slot import SlotQuery, TimeStatus, MakeAppointmentReq
 from .types import SlotAsPrimary, MySlotAsElement
 
 
 router = APIRouter(prefix = '/appointments', tags = ['appointments'])
 
 
-@router.get('', response_model = list[MySlotAsElement])
+@router.get('', response_model = PaginationResponse[MySlotAsElement])
 async def my_appointments(
+    time_status: TimeStatus | None = Query(default = None),
+    offset: int = Query(ge = 0, default = 0),
+    limit: int = Query(gt = 0, default = 10),
     me: User = Depends(auth.authenticate_me),
     db: AsyncSession = Depends(connect_db)
 ):
-    appointments = await SlotQuery(db).my(me)
+    slot_query = SlotQuery(db)
+    appointments = await slot_query.paginate_my(
+        time_status = time_status,
+        offset = offset,
+        limit = limit,
+        patient = me
+    )
     return JSONResponse(
         headers = auth.get_auth_headers(me),
-        content = [MySlotAsElement.to_json(appointment) for appointment in appointments]
+        content = PaginationResponse.to_json(
+            offset = offset,
+            limit = limit,
+            total = await slot_query.total(patient = me, time_status = time_status),
+            page = [MySlotAsElement.to_json(appointment) for appointment in appointments]
+        )
     )
 
 

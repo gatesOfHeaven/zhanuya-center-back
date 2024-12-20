@@ -15,7 +15,7 @@ from entities.room import Room
 from entities.payment import Payment
 from .entity import Slot
 from .validator import Validator
-from .values import TIMEDELTA_BEFORE_START_TO_CONFIRM, TIMEDELTA_AFTER_START_TO_CONFIRM
+from .values import TIMEDELTA_BEFORE_START_TO_CONFIRM, TIMEDELTA_AFTER_START_TO_CONFIRM, TimeStatus
 
 
 class Query(BaseQuery):
@@ -90,15 +90,51 @@ class Query(BaseQuery):
         return slot
 
 
-    async def my(self, me: User) -> list[Slot]:
-        query = self.select_with_relations.where(Slot.patient_id == me.id)
+    async def paginate_my(self, time_status: TimeStatus | None, offset: int, limit: int, patient: User) -> list[Slot]:
+        query = self.select_with_relations.where(Slot.patient == patient).offset(offset).limit(limit)
+        now = datetime.now()
+        if time_status == TimeStatus.PAST: query = query.where(or_(
+            Slot.date < now.date(),
+            and_(
+                Slot.date == now.date(),
+                Slot.ends_at <= now.time()
+            )
+        )).order_by(Slot.date.desc(), Slot.starts_at.desc())
+        elif time_status == TimeStatus.UPCOMING: query = query.where(or_(
+            Slot.date > now.date(),
+            and_(
+                Slot.date == now.date(),
+                Slot.ends_at > now.time()
+            )
+        )).order_by(Slot.date.asc(), Slot.starts_at.asc())
+        else: query = query.order_by(Slot.date.desc(), Slot.starts_at.desc())
         return await self.fetch_all(query)
+
+
+    async def total(self, patient: User, time_status: TimeStatus | None) -> int:
+        query = select(func.count(Slot.id)).where(Slot.patient == patient)
+        now = datetime.now()
+        if time_status == TimeStatus.PAST: query = query.where(or_(
+            Slot.date < now.date(),
+            and_(
+                Slot.date == now.date(),
+                Slot.ends_at <= now.time()
+            )
+        ))
+        elif time_status == TimeStatus.UPCOMING: query = query.where(or_(
+            Slot.date > now.date(),
+            and_(
+                Slot.date == now.date(),
+                Slot.ends_at > now.time()
+            )
+        ))
+        return await self.field(query)
 
 
     async def upcomings(self) -> list[Slot]:
         after_halfhour = datetime.now() + timedelta(minutes = 30)
         query = self.select_with_relations.where(or_(
-            Slot.date >= after_halfhour.date(),
+            Slot.date > after_halfhour.date(),
             and_(
                 Slot.date == after_halfhour.date(),
                 Slot.starts_at >= after_halfhour.time()

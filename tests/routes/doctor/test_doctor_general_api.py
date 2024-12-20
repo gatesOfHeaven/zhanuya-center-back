@@ -46,6 +46,6 @@ async def test_medical_record_access(
                 headers = auth.get_auth_headers(doctor.profile)
             )
             start_datetime = appointment.start_datetime()
-            if start_datetime - timedelta(hours = 1) < datetime.now() < start_datetime + timedelta(hours = 2):
+            if start_datetime - timedelta(hours = 1) <= datetime.now() <= start_datetime + timedelta(hours = 2):
                 assert response.status_code == status.HTTP_200_OK
             else: assert response.status_code == status.HTTP_403_FORBIDDEN

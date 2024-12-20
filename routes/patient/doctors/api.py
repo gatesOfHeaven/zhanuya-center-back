@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Path, Query, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from core import connect_db
 from core.facades import calc
@@ -105,7 +105,7 @@ async def free_slots(
                 is_free = False
                 next_timepoint = next_slots.pop(0).end_datetime()
 
-            if is_free: free_slots.append(FreeSlotAsElement(
+            if is_free and end_timepoint > datetime.now(): free_slots.append(FreeSlotAsElement(
                 startTime = calc.time_to_str(current_timepoint, '%H:%M:%S'),
                 endTime = calc.time_to_str(end_timepoint, '%H:%M:%S')
             ))

@@ -4,6 +4,7 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timedelta
 
+from core.bases import PaginationResponse
 from core.facades import week, calc
 from utils.decorators import auth
 from entities.user import UserQuery, UserAsForeign
@@ -86,7 +87,7 @@ async def test_appointments_crud(
                 response = await client.get(route, headers = headers)
                 my_appointments = [
                     MySlotAsElement(**appointment)
-                    for appointment in response.json()
+                    for appointment in PaginationResponse(**response.json()).page
                 ]
                 appointment_id = my_appointments[0].id
                 assert response.status_code == status.HTTP_200_OK
@@ -109,7 +110,7 @@ async def test_appointments_crud(
             response = await client.get(route, headers = headers)
             my_appointments = [
                 MySlotAsElement(**appointment)
-                for appointment in response.json()
+                for appointment in PaginationResponse(**response.json()).page
             ]
             assert response.status_code == status.HTTP_200_OK
             assert my_appointments == []

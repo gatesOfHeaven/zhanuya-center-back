@@ -10,3 +10,8 @@ class AppointmentStatus(str, Enum):
     BOOKED = 'booked'
     MISSED = 'missed'
     CONFIRMED = 'confirmed'
+
+
+class TimeStatus(str, Enum):
+    PAST = 'past'
+    UPCOMING = 'upcoming'
