@@ -23,7 +23,7 @@ async def to_confirm(
 ):
     return StreamingResponse(
         media_type = 'text/event-stream',
-        content = sse_from_appointments(SlotQuery(db), terminal)
+        content = sse_from_appointments(db, terminal)
     )
 
 
