@@ -21,12 +21,10 @@ async def to_confirm(
     terminal: Terminal = Depends(auth.authenticate_terminal),
     db: AsyncSession = Depends(connect_db)
 ):
-    try:
-        return StreamingResponse(
-            media_type = 'text/event-stream',
-            content = sse_from_appointments(SlotQuery(db), terminal)
-        )
-    except Exception as e: print(e)
+    return StreamingResponse(
+        media_type = 'text/event-stream',
+        content = sse_from_appointments(SlotQuery(db), terminal)
+    )
 
 
 @router.get('/{id}', response_model = SlotAsPrimary)

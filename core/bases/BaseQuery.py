@@ -17,6 +17,12 @@ class BaseQuery:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self.db.close()
+
 
     async def commit(self):
         try: await self.db.commit()
@@ -32,7 +38,7 @@ class BaseQuery:
     async def first(self, query: Select[tuple[Entity]]) -> Entity | None:
         return (await self.db.execute(query)).unique().scalar_one_or_none()
 
-        
+
     async def fetch_all(self, query: Select[tuple[Entity]]) -> list[Entity]:
         return (await self.db.execute(query)).unique().scalars().all()
     
