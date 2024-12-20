@@ -32,4 +32,3 @@ async def send(
     except SMTPException as e:
         print(f'SMTP error: {e}')
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-    finally: await server.quit()
