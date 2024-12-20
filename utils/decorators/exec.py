@@ -14,7 +14,6 @@ def job_id(appointment: Slot) -> str:
 
 def schedule_appointment_notification(appointment: Slot, hours: int = 3, save_log: bool = True):
     async def notify_about_appointment(appointment: Slot):
-        profile = appointment.workday.doctor.profile
         office = appointment.workday.doctor.office
         if save_log:
             async with asyncopen(LOG_DIR / 'notified-appointments.txt', 'a') as file:
@@ -22,7 +21,8 @@ def schedule_appointment_notification(appointment: Slot, hours: int = 3, save_lo
         await mail.send(
             appointment.patient.email,
             'You have an Appointment',
-            f'Your doctor {profile.name} {profile.surname} will be waiting for you at the address {office.building.address}, office {office.title} at {calc.time_to_str(appointment.starts_at, '%H:%M')}'
+            f'Your doctor {appointment.workday.doctor.profile.fullname()} will be waiting for you at the address '
+            f'{office.building.address}, office {office.title} at {calc.time_to_str(appointment.starts_at, '%H:%M')}'
         )
 
     later(

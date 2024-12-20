@@ -14,6 +14,7 @@ class Building(BaseEntity):
 
     id = Column(Integer, primary_key = True)
     address = Column(String, nullable = False)
+    location = Column(String, nullable = False)
 
     rooms: Mapped[list['Room']] = relationship(back_populates = 'building')
     terminals: Mapped[list['Terminal']] = relationship(back_populates = 'building')

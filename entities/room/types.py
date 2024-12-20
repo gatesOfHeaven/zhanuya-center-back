@@ -6,6 +6,7 @@ class RoomAsPrimary(BaseResponse):
     id: int
     building_id: int
     address: str
+    location: str
     title: str
 
     @staticmethod
@@ -14,5 +15,6 @@ class RoomAsPrimary(BaseResponse):
             id = room.id,
             building_id = room.building_id,
             address = room.building.address,
+            location = room.building.location,
             title = room.title
         ).model_dump()
